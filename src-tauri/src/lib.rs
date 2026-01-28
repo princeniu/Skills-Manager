@@ -35,18 +35,25 @@ fn list_skills() -> Result<Vec<skills::types::Skill>, String> {
             item.enabled = false;
         }
     }
+    items.sort_by(|a, b| a.slug.cmp(&b.slug));
     Ok(items)
 }
 
 #[tauri::command]
-fn set_enabled(skill_realpath: String, enabled: bool) -> Result<(), String> {
+fn set_enabled(skill_realpath: String, enabled: bool) -> Result<String, String> {
     config::set_enabled(&skill_realpath, enabled).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 fn delete_skill(skill_realpath: String) -> Result<(), String> {
-    trash::delete(&skill_realpath).map_err(|e| e.to_string())?;
-    config::set_enabled(&skill_realpath, true).map_err(|e| e.to_string())
+    let root = skills::skills_root().map_err(|e| e.to_string())?;
+    let real = std::fs::canonicalize(&skill_realpath).map_err(|e| e.to_string())?;
+    if !real.starts_with(&root) {
+        return Err("Refusing to delete path outside skills root".to_string());
+    }
+    trash::delete(&real).map_err(|e| e.to_string())?;
+    let _ = config::set_enabled(&real.to_string_lossy(), true).map_err(|e| e.to_string())?;
+    Ok(())
 }
 
 #[tauri::command]

@@ -5,20 +5,27 @@ use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
 
-pub(crate) fn normalize_path(path: &str) -> String {
-    let expanded = if let Some(stripped) = path.strip_prefix("~/") {
+fn expand_path(path: &str) -> String {
+    if let Some(stripped) = path.strip_prefix("~/") {
         if let Ok(home) = std::env::var("HOME") {
-            format!("{}/{}", home, stripped)
-        } else {
-            path.to_string()
+            return format!("{}/{}", home, stripped);
         }
-    } else {
-        path.to_string()
-    };
+    }
+    path.to_string()
+}
 
+pub(crate) fn normalize_path(path: &str) -> String {
+    let expanded = expand_path(path);
     std::fs::canonicalize(&expanded)
         .map(|p| p.to_string_lossy().to_string())
         .unwrap_or(expanded)
+}
+
+pub(crate) fn canonicalize_path(path: &str) -> Option<String> {
+    let expanded = expand_path(path);
+    std::fs::canonicalize(&expanded)
+        .ok()
+        .map(|p| p.to_string_lossy().to_string())
 }
 
 fn config_path() -> std::io::Result<PathBuf> {
@@ -44,10 +51,11 @@ pub fn save_config(contents: &str) -> std::io::Result<()> {
     fs::write(path, contents)
 }
 
-pub fn set_enabled(realpath: &str, enabled: bool) -> std::io::Result<()> {
+pub fn set_enabled(realpath: &str, enabled: bool) -> std::io::Result<String> {
     let original = load_config()?;
     let updated = patch::set_enabled(&original, realpath, enabled);
-    save_config(&updated)
+    save_config(&updated)?;
+    Ok("restart_required".to_string())
 }
 
 pub fn disabled_paths() -> std::io::Result<HashSet<String>> {
@@ -76,7 +84,11 @@ pub fn disabled_paths() -> std::io::Result<HashSet<String>> {
             continue;
         }
         if let Some(value) = patch::extract_path_value(trimmed) {
-            path_value = Some(value);
+            let canonical = canonicalize_path(&value);
+            if canonical.is_none() {
+                log::warn!("Ignoring config entry with non-resolvable path: {}", value);
+            }
+            path_value = canonical;
         } else if trimmed.starts_with("enabled") {
             enabled_value = Some(trimmed.contains("false"));
         }
@@ -93,6 +105,9 @@ pub fn disabled_paths() -> std::io::Result<HashSet<String>> {
 
 pub fn config_fingerprint() -> std::io::Result<String> {
     let contents = load_config()?;
+    if contents.is_empty() {
+        return Ok(String::new());
+    }
     let mut hasher = Sha256::new();
     hasher.update(contents.as_bytes());
     Ok(format!("{:x}", hasher.finalize()))
