@@ -164,6 +164,40 @@ body {
   gap: 10px;
 }
 
+.toast {
+  position: fixed;
+  right: 28px;
+  bottom: 24px;
+  background: #111111;
+  color: #ffffff;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  letter-spacing: 0.6px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 160ms ease, transform 160ms ease;
+  z-index: 60;
+}
+
+.toast[hidden] {
+  display: none;
+}
+
+.toast[data-state='success'] {
+  background: #111111;
+}
+
+.toast[data-state='error'] {
+  background: var(--danger);
+}
+
+.toast:not([hidden]) {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .search {
   flex: 1;
   display: flex;

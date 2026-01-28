@@ -78,6 +78,8 @@ export function mountApp(root: HTMLElement) {
         <div class="status-meta" id="statusMeta"></div>
       </footer>
 
+      <div class="toast" id="toast" hidden></div>
+
       <div class="modal-backdrop" id="confirmBackdrop" hidden>
         <div class="modal">
           <div class="modal-title" id="confirmTitle">Delete skill?</div>
@@ -111,6 +113,7 @@ export function mountApp(root: HTMLElement) {
   const restartNotice = root.querySelector<HTMLDivElement>('#restartNotice')!
   const refreshBtn = root.querySelector<HTMLButtonElement>('#refreshBtn')!
   const alertBar = root.querySelector<HTMLDivElement>('#alertBar')!
+  const toast = root.querySelector<HTMLDivElement>('#toast')!
   const confirmBackdrop = root.querySelector<HTMLDivElement>('#confirmBackdrop')!
   const confirmTitle = root.querySelector<HTMLDivElement>('#confirmTitle')!
   const confirmBody = root.querySelector<HTMLDivElement>('#confirmBody')!
@@ -272,6 +275,7 @@ export function mountApp(root: HTMLElement) {
       }
       state.selectedRealpath = selected.realpath
       await refreshSkills(false)
+      showToast(selected.enabled ? 'Disabled' : 'Enabled')
       setStatus('Ready')
     } catch (err) {
       setError(`Toggle failed: ${formatError(err)}`)
@@ -374,6 +378,7 @@ export function mountApp(root: HTMLElement) {
         state.selectedId = null
         state.selectedRealpath = null
         await refreshSkills(false)
+        showToast('Deleted')
         setStatus('Ready')
       } catch (err) {
         setError(`Delete failed: ${formatError(err)}`)
@@ -389,9 +394,10 @@ export function mountApp(root: HTMLElement) {
           const original = btn.textContent || 'Copy'
           btn.textContent = 'Copied'
           setTimeout(() => {
-            btn.textContent = original
-            btn.dataset.state = ''
-          }, 1200)
+          btn.textContent = original
+          btn.dataset.state = ''
+        }, 1200)
+          showToast('Copied')
           setStatus('Copied')
         } catch (err) {
           setError(`Copy failed: ${formatError(err)}`)
@@ -411,6 +417,7 @@ export function mountApp(root: HTMLElement) {
     statusText.dataset.state = 'error'
     alertBar.textContent = text
     alertBar.hidden = false
+    showToast(text, true)
   }
 
   function formatDate(epochSeconds: number) {
@@ -472,6 +479,15 @@ export function mountApp(root: HTMLElement) {
       confirmOk.addEventListener('click', onOk)
       confirmBackdrop.addEventListener('click', onBackdrop)
     })
+  }
+
+  function showToast(message: string, isError = false) {
+    toast.textContent = message
+    toast.dataset.state = isError ? 'error' : 'success'
+    toast.hidden = false
+    setTimeout(() => {
+      toast.hidden = true
+    }, 1400)
   }
 
   void refreshSkills(true)
