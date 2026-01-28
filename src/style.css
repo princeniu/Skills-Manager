@@ -593,7 +593,7 @@ body {
 }
 
 .primary-action {
-  min-width: 140px;
+  width: 100%;
 }
 
 .action-divider {
@@ -723,9 +723,10 @@ button.danger {
 }
 
 .ghost-danger {
-  background: transparent;
+  background: rgba(227, 92, 92, 0.08);
   border: 1px solid rgba(227, 92, 92, 0.5);
   color: var(--danger-500);
+  width: 100%;
 }
 
 .pill {
