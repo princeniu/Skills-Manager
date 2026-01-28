@@ -1,18 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap');
-
 :root {
-  --ink: #17130f;
-  --paper: #f4efe7;
-  --paper-deep: #ebe4d9;
-  --accent: #c04a2b;
-  --accent-2: #0f5b4c;
-  --muted: #8b7f73;
-  --border: #d9cfc1;
-  --shadow: 0 24px 60px rgba(18, 14, 10, 0.12);
-  --radius: 18px;
-  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --sans: "IBM Plex Sans", "Segoe UI", sans-serif;
-  --display: "Fraunces", "Times New Roman", serif;
+  --bg: #f7f7f8;
+  --panel: #ffffff;
+  --panel-muted: #f1f2f4;
+  --ink: #111111;
+  --muted: #5a5f66;
+  --border: #e5e6e8;
+  --accent: #1e7a5a;
+  --danger: #c8453c;
+  --accent-soft: #e9f2ef;
+  --danger-soft: #f6e6e4;
+  --selected-bg: #f2f6ff;
+  --selected-border: #bfd3ff;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --radius: 12px;
+  --mono: "SF Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", sans-serif;
 }
 
 * {
@@ -24,19 +26,7 @@ body {
   min-height: 100vh;
   font-family: var(--sans);
   color: var(--ink);
-  background: radial-gradient(circle at 15% 10%, rgba(255, 255, 255, 0.7), transparent 45%),
-    radial-gradient(circle at 85% 10%, rgba(233, 214, 197, 0.7), transparent 48%),
-    linear-gradient(140deg, #f7f1e8 0%, #efe5d7 40%, #f8f2ea 100%);
-}
-
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220"><rect width="220" height="220" fill="none" stroke="%23d9cfc1" stroke-width="0.6" opacity="0.4"/></svg>');
-  opacity: 0.3;
-  pointer-events: none;
-  mix-blend-mode: multiply;
+  background: var(--bg);
 }
 
 #app {
@@ -47,8 +37,8 @@ body::before {
 .app-shell {
   max-width: 1180px;
   margin: 0 auto;
-  background: var(--paper);
-  border-radius: 26px;
+  background: var(--panel);
+  border-radius: 16px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
   overflow: hidden;
@@ -62,9 +52,9 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 26px 32px 18px;
+  padding: 20px 24px;
   border-bottom: 1px solid var(--border);
-  background: linear-gradient(120deg, #f9f3ea 0%, #f1e6d9 100%);
+  background: var(--panel);
 }
 
 .brand {
@@ -74,28 +64,28 @@ body::before {
 }
 
 .brand-mark {
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   display: grid;
   place-items: center;
-  border-radius: 16px;
-  background: var(--ink);
-  color: #fff6ea;
-  font-family: var(--display);
-  font-size: 20px;
-  letter-spacing: 2px;
+  border-radius: 12px;
+  background: #1c1f24;
+  color: #ffffff;
+  font-size: 14px;
+  letter-spacing: 1.4px;
+  font-weight: 600;
 }
 
 .brand-title {
-  font-family: var(--display);
-  font-size: 26px;
-  letter-spacing: 0.4px;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
 }
 
 .brand-subtitle {
-  font-size: 12px;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 1.6px;
   color: var(--muted);
   margin-top: 4px;
 }
@@ -107,11 +97,11 @@ body::before {
 }
 
 .notice {
-  padding: 8px 14px;
+  padding: 6px 12px;
   border-radius: 999px;
-  background: rgba(192, 74, 43, 0.12);
-  color: var(--accent);
-  font-size: 12px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 11px;
   letter-spacing: 1px;
   text-transform: uppercase;
 }
@@ -121,9 +111,9 @@ body::before {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 18px 32px;
+  padding: 12px 24px;
   border-bottom: 1px solid var(--border);
-  background: var(--paper-deep);
+  background: var(--panel);
 }
 
 .alert-bar {
@@ -139,10 +129,10 @@ body::before {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 14px;
-  border-radius: 16px;
-  border: 1px solid #d6c9ba;
-  background: #fff9f1;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #fbfbfc;
 }
 
 .search-icon {
@@ -154,7 +144,7 @@ body::before {
   border: none;
   background: transparent;
   width: 100%;
-  font-size: 14px;
+  font-size: 13px;
   outline: none;
   font-family: var(--sans);
 }
@@ -163,15 +153,15 @@ body::before {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--muted);
 }
 
 .sorter select {
-  border-radius: 999px;
-  border: 1px solid #d6c9ba;
-  padding: 6px 14px;
-  background: #fff;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  background: #ffffff;
   font-family: var(--sans);
 }
 
@@ -185,36 +175,36 @@ body::before {
 
 .list-panel {
   border-right: 1px solid var(--border);
-  padding: 22px 20px 22px 26px;
+  padding: 16px 16px 16px 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  background: rgba(255, 255, 255, 0.6);
+  gap: 10px;
+  background: var(--panel);
   min-height: 0;
   overflow: auto;
 }
 
 .list-meta {
-  font-size: 12px;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 1.6px;
   color: var(--muted);
 }
 
 .skill-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   overflow: auto;
   padding-right: 8px;
 }
 
 .skill-card {
   text-align: left;
-  border: 1px solid #e2d6c6;
-  border-radius: 18px;
-  padding: 14px 16px;
-  background: #fffdf9;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  background: #ffffff;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
 }
@@ -225,36 +215,37 @@ body::before {
 }
 
 .skill-card.selected {
-  border-color: var(--accent);
-  box-shadow: 0 16px 30px rgba(192, 74, 43, 0.15);
+  border-color: var(--selected-border);
+  background: var(--selected-bg);
+  box-shadow: 0 8px 18px rgba(31, 41, 55, 0.08);
 }
 
 .skill-card.disabled {
   opacity: 0.6;
-  background: #f5eee6;
+  background: #f6f6f7;
   border-style: dashed;
 }
 
 .skill-title {
-  font-family: var(--display);
-  font-size: 18px;
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .skill-desc {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--muted);
   margin-top: 6px;
   line-height: 1.4;
 }
 
 .skill-meta {
-  margin-top: 12px;
+  margin-top: 8px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 1.4px;
+  letter-spacing: 1.2px;
   color: var(--muted);
 }
 
@@ -263,8 +254,8 @@ body::before {
 }
 
 .detail-panel {
-  padding: 28px 32px;
-  background: #fff7ee;
+  padding: 20px 24px;
+  background: var(--panel);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -302,36 +293,36 @@ body::before {
 }
 
 .detail-title {
-  font-family: var(--display);
-  font-size: 28px;
+  font-size: 20px;
+  font-weight: 600;
 }
 
 .detail-sub {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--muted);
-  letter-spacing: 2px;
+  letter-spacing: 1.6px;
   text-transform: uppercase;
 }
 
 .detail-description {
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
-  color: #5a4c40;
+  color: var(--muted);
 }
 
 .detail-status {
-  padding: 10px 14px;
-  border-radius: 12px;
-  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  background: rgba(15, 91, 76, 0.12);
-  color: var(--accent-2);
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .detail-status.disabled {
-  background: rgba(192, 74, 43, 0.12);
-  color: var(--accent);
+  background: var(--danger-soft);
+  color: var(--danger);
 }
 
 .detail-actions {
@@ -342,27 +333,27 @@ body::before {
 .detail-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  gap: 10px;
 }
 
 .detail-item {
-  padding: 12px 14px;
-  border-radius: 14px;
-  border: 1px solid #e6d9c9;
-  background: #fffdf8;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #fafafb;
 }
 
 .detail-label {
-  font-size: 11px;
+  font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.2px;
   color: var(--muted);
   margin-bottom: 6px;
 }
 
 .detail-value {
-  font-size: 13px;
-  color: #44362a;
+  font-size: 12px;
+  color: var(--ink);
   word-break: break-all;
 }
 
@@ -371,16 +362,16 @@ body::before {
 }
 
 .statusbar {
-  padding: 12px 24px;
+  padding: 10px 20px;
   border-top: 1px solid var(--border);
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
-  background: #f1e5d8;
+  font-size: 11px;
+  background: #fafafb;
 }
 
 .statusbar [data-state='error'] {
-  color: var(--accent);
+  color: var(--danger);
 }
 
 .status-meta {
@@ -394,54 +385,54 @@ button {
 }
 
 button.ghost {
-  padding: 8px 14px;
-  border-radius: 999px;
+  padding: 6px 12px;
+  border-radius: 10px;
   border: 1px solid var(--border);
-  background: #fff8ee;
+  background: #ffffff;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 button.primary {
-  padding: 10px 18px;
-  border-radius: 12px;
-  background: var(--accent-2);
-  color: #f9f6ef;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #ffffff;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 11px;
   letter-spacing: 1px;
   text-transform: uppercase;
 }
 
 button.danger {
-  padding: 10px 18px;
-  border-radius: 12px;
-  background: #5c2a1f;
-  color: #fef4ea;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: var(--danger);
+  color: #ffffff;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 11px;
   letter-spacing: 1px;
   text-transform: uppercase;
 }
 
 .pill {
-  padding: 4px 10px;
+  padding: 3px 8px;
   border-radius: 999px;
-  font-size: 10px;
-  letter-spacing: 1.4px;
+  font-size: 9px;
+  letter-spacing: 1px;
   text-transform: uppercase;
 }
 
 .pill.enabled {
-  background: rgba(15, 91, 76, 0.16);
-  color: var(--accent-2);
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .pill.disabled {
-  background: rgba(192, 74, 43, 0.18);
-  color: var(--accent);
+  background: var(--danger-soft);
+  color: var(--danger);
 }
 
 @media (max-width: 960px) {
