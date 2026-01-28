@@ -84,11 +84,12 @@ pub fn disabled_paths() -> std::io::Result<HashSet<String>> {
             continue;
         }
         if let Some(value) = patch::extract_path_value(trimmed) {
+            let expanded = expand_path(&value);
             let canonical = canonicalize_path(&value);
             if canonical.is_none() {
-                log::warn!("Ignoring config entry with non-resolvable path: {}", value);
+                log::warn!("Non-resolvable path in config, using expanded path: {}", expanded);
             }
-            path_value = canonical;
+            path_value = canonical.or(Some(expanded));
         } else if trimmed.starts_with("enabled") {
             enabled_value = Some(trimmed.contains("false"));
         }

@@ -30,8 +30,9 @@ fn list_skills() -> Result<Vec<skills::types::Skill>, String> {
     let mut items = skills::scan_skills(&root).map_err(|e| e.to_string())?;
     let disabled = config::disabled_paths().map_err(|e| e.to_string())?;
     for item in &mut items {
-        let norm = config::normalize_path(&item.realpath);
-        if disabled.contains(&norm) {
+        let norm_real = config::normalize_path(&item.realpath);
+        let norm_path = config::normalize_path(&item.path);
+        if disabled.contains(&norm_real) || disabled.contains(&norm_path) {
             item.enabled = false;
         }
     }
