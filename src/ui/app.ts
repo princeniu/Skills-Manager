@@ -364,21 +364,28 @@ export function mountApp(root: HTMLElement) {
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
       .slice(0, 12)
 
-    tagList.innerHTML = tags
-      .map(
-        ([tag, count]) => `
-          <button class="tag-item ${state.tagFilter === tag ? 'active' : ''}" data-tag="${escapeHtml(tag)}">
-            <span class="tag-label">${escapeHtml(tag)}</span>
-            <span class="tag-count">${count}</span>
-          </button>
-        `
-      )
-      .join('')
+    const total = state.skills.length
+    tagList.innerHTML = `
+      <button class="tag-item ${state.tagFilter === null ? 'active' : ''}" data-tag="">
+        <span class="tag-label">All</span>
+        <span class="tag-count">${total}</span>
+      </button>
+      ${tags
+        .map(
+          ([tag, count]) => `
+            <button class="tag-item ${state.tagFilter === tag ? 'active' : ''}" data-tag="${escapeHtml(tag)}">
+              <span class="tag-label">${escapeHtml(tag)}</span>
+              <span class="tag-count">${count}</span>
+            </button>
+          `
+        )
+        .join('')}
+    `
 
     tagList.querySelectorAll<HTMLButtonElement>('.tag-item').forEach((btn) => {
       btn.addEventListener('click', () => {
         const tag = btn.dataset.tag || null
-        state.tagFilter = state.tagFilter === tag ? null : tag
+        state.tagFilter = tag ? (state.tagFilter === tag ? null : tag) : null
         render()
       })
     })
