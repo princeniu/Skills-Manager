@@ -1,6 +1,18 @@
 pub mod skills;
 pub mod config;
 
+use once_cell::sync::Lazy;
+use std::sync::Mutex;
+use std::time::{Duration, Instant};
+
+#[derive(Clone, Default)]
+struct SkillCache {
+  last_scan: Option<Instant>,
+  skills: Vec<skills::types::Skill>,
+}
+
+static SKILL_CACHE: Lazy<Mutex<SkillCache>> = Lazy::new(|| Mutex::new(SkillCache::default()));
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
@@ -27,7 +39,26 @@ pub fn run() {
 #[tauri::command]
 fn list_skills() -> Result<Vec<skills::types::Skill>, String> {
     let root = skills::skills_root().map_err(|e| e.to_string())?;
-    let mut items = skills::scan_skills(&root).map_err(|e| e.to_string())?;
+    let mut items: Vec<skills::types::Skill> = Vec::new();
+    let now = Instant::now();
+    let mut used_cache = false;
+
+    if let Ok(cache) = SKILL_CACHE.lock() {
+      if let Some(last) = cache.last_scan {
+        if now.duration_since(last) < Duration::from_secs(2) {
+          items = cache.skills.clone();
+          used_cache = true;
+        }
+      }
+    }
+
+    if !used_cache {
+      items = skills::scan_skills(&root).map_err(|e| e.to_string())?;
+      if let Ok(mut cache) = SKILL_CACHE.lock() {
+        cache.last_scan = Some(now);
+        cache.skills = items.clone();
+      }
+    }
     let disabled = config::disabled_paths().map_err(|e| e.to_string())?;
     for item in &mut items {
         let norm_real = config::normalize_path(&item.realpath);
@@ -49,6 +80,13 @@ fn set_enabled(skill_realpath: String, enabled: bool) -> Result<String, String> 
     config::set_enabled(&skill_realpath, enabled).map_err(|e| e.to_string())
 }
 
+fn invalidate_cache() {
+    if let Ok(mut cache) = SKILL_CACHE.lock() {
+        cache.last_scan = None;
+        cache.skills.clear();
+    }
+}
+
 #[tauri::command]
 fn delete_skill(skill_realpath: String) -> Result<(), String> {
     let root = skills::skills_root().map_err(|e| e.to_string())?;
@@ -57,6 +95,7 @@ fn delete_skill(skill_realpath: String) -> Result<(), String> {
         return Err("Refusing to delete path outside skills root".to_string());
     }
     trash::delete(&real).map_err(|e| format!("Trash failed: {e}"))?;
+    invalidate_cache();
     if let Err(err) = config::set_enabled(&real.to_string_lossy(), true) {
         return Err(format!("Trash succeeded but config cleanup failed: {err}"));
     }
