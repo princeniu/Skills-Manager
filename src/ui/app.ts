@@ -123,10 +123,8 @@ export function mountApp(root: HTMLElement) {
       if (showStatus) setStatus('Refreshing…')
       const items = await invoke<Skill[]>('list_skills')
       state.skills = items
-      if (!state.selectedId && items.length > 0) {
-        state.selectedId = items[0].id
-      } else if (state.selectedId && !items.find((s) => s.id === state.selectedId)) {
-        state.selectedId = items.length ? items[0].id : null
+      if (state.selectedId && !items.find((s) => s.id === state.selectedId)) {
+        state.selectedId = null
       }
       setStatus('Ready')
       render()
