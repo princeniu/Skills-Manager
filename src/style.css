@@ -41,6 +41,7 @@ body::before {
 
 #app {
   padding: 28px;
+  height: 100vh;
 }
 
 .app-shell {
@@ -426,15 +427,23 @@ button.danger {
 
   .app-shell {
     min-height: auto;
+    height: calc(100vh - 32px);
   }
 
   .content {
     grid-template-columns: 1fr;
+    grid-template-rows: minmax(240px, 45vh) minmax(240px, 1fr);
+    height: calc(100vh - 300px);
   }
 
   .list-panel {
     border-right: none;
     border-bottom: 1px solid var(--border);
+  }
+
+  .list-panel,
+  .detail-panel {
+    overflow: auto;
   }
 
   .detail-grid {
