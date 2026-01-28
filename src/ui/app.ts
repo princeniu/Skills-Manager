@@ -20,6 +20,7 @@ type AppState = {
   selectedId: string | null
   selectedRealpath: string | null
   fingerprint: string
+  groupByStatus: boolean
 }
 
 const REFRESH_INTERVAL_MS = 5000
@@ -54,6 +55,9 @@ export function mountApp(root: HTMLElement) {
             <option value="name">Name (A–Z)</option>
             <option value="enabled">Enabled first</option>
           </select>
+        </div>
+        <div class="toggle">
+          <button class="toggle-btn" id="groupToggle" aria-pressed="false">Group</button>
         </div>
       </section>
       <div class="alert-bar" id="alertBar" hidden></div>
@@ -99,11 +103,13 @@ export function mountApp(root: HTMLElement) {
     sortKey: 'name',
     selectedId: null,
     selectedRealpath: null,
-    fingerprint: ''
+    fingerprint: '',
+    groupByStatus: false
   }
 
   const searchInput = root.querySelector<HTMLInputElement>('#searchInput')!
   const sortSelect = root.querySelector<HTMLSelectElement>('#sortSelect')!
+  const groupToggle = root.querySelector<HTMLButtonElement>('#groupToggle')!
   const skillList = root.querySelector<HTMLDivElement>('#skillList')!
   const listMeta = root.querySelector<HTMLDivElement>('#listMeta')!
   const detailView = root.querySelector<HTMLDivElement>('#detailView')!
@@ -128,6 +134,13 @@ export function mountApp(root: HTMLElement) {
 
   sortSelect.addEventListener('change', () => {
     state.sortKey = sortSelect.value as SortKey
+    render()
+  })
+
+  groupToggle.addEventListener('click', () => {
+    state.groupByStatus = !state.groupByStatus
+    groupToggle.setAttribute('aria-pressed', String(state.groupByStatus))
+    groupToggle.classList.toggle('active', state.groupByStatus)
     render()
   })
 
@@ -215,25 +228,16 @@ export function mountApp(root: HTMLElement) {
 
     listMeta.textContent = `${filtered.length} shown · ${enabledCount}/${state.skills.length} enabled`
 
-    skillList.innerHTML = filtered
-      .map((skill) => {
-        const selected = skill.id === state.selectedId
-        const status = skill.enabled ? 'enabled' : 'disabled'
-        const name = highlightText(skill.name, state.query)
-        const desc = highlightText(skill.description || 'No description', state.query)
-        const slug = highlightText(skill.slug, state.query)
-        return `
-          <button class="skill-card ${selected ? 'selected' : ''} ${!skill.enabled ? 'disabled' : ''}" data-id="${skill.id}">
-            <div class="skill-title">${name}</div>
-            <div class="skill-desc">${desc}</div>
-            <div class="skill-meta">
-              <span class="pill ${status}">${status}</span>
-              <span class="slug">${slug}</span>
-            </div>
-          </button>
-        `
-      })
-      .join('')
+    if (state.groupByStatus) {
+      const enabledList = filtered.filter((s) => s.enabled)
+      const disabledList = filtered.filter((s) => !s.enabled)
+      skillList.innerHTML = `
+        ${renderGroup('Enabled', enabledList)}
+        ${renderGroup('Disabled', disabledList)}
+      `
+    } else {
+      skillList.innerHTML = filtered.map(renderCard).join('')
+    }
 
     skillList.querySelectorAll<HTMLButtonElement>('.skill-card').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -247,6 +251,36 @@ export function mountApp(root: HTMLElement) {
 
     renderDetail()
     statusMeta.textContent = state.fingerprint ? `config: ${state.fingerprint.slice(0, 10)}…` : 'config: empty'
+  }
+
+  function renderGroup(label: string, list: Skill[]) {
+    if (list.length === 0) return ''
+    const count = list.length
+    return `
+      <div class="group-header">
+        <span>${label}</span>
+        <span class="group-count">${count}</span>
+      </div>
+      ${list.map(renderCard).join('')}
+    `
+  }
+
+  function renderCard(skill: Skill) {
+    const selected = skill.id === state.selectedId
+    const status = skill.enabled ? 'enabled' : 'disabled'
+    const name = highlightText(skill.name, state.query)
+    const desc = highlightText(skill.description || 'No description', state.query)
+    const slug = highlightText(skill.slug, state.query)
+    return `
+      <button class="skill-card ${selected ? 'selected' : ''} ${!skill.enabled ? 'disabled' : ''}" data-id="${skill.id}">
+        <div class="skill-title">${name}</div>
+        <div class="skill-desc">${desc}</div>
+        <div class="skill-meta">
+          <span class="pill ${status}">${status}</span>
+          <span class="slug">${slug}</span>
+        </div>
+      </button>
+    `
   }
 
   function moveSelection(delta: number) {
