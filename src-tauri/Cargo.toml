@@ -24,3 +24,4 @@ log = "0.4"
 tauri = { version = "2.9.5" }
 tauri-plugin-log = "2"
 sha2 = "0.10"
+trash = "3.2"

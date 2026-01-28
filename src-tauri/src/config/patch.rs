@@ -1,20 +1,4 @@
-fn normalize_path(path: &str) -> String {
-    let expanded = if let Some(stripped) = path.strip_prefix("~/") {
-        if let Ok(home) = std::env::var("HOME") {
-            format!("{}/{}", home, stripped)
-        } else {
-            path.to_string()
-        }
-    } else {
-        path.to_string()
-    };
-
-    std::fs::canonicalize(&expanded)
-        .map(|p| p.to_string_lossy().to_string())
-        .unwrap_or(expanded)
-}
-
-fn extract_path_value(line: &str) -> Option<String> {
+pub(crate) fn extract_path_value(line: &str) -> Option<String> {
     let trimmed = line.trim();
     if !trimmed.starts_with("path") {
         return None;
@@ -28,10 +12,10 @@ fn extract_path_value(line: &str) -> Option<String> {
 }
 
 fn block_has_path(block: &[String], realpath: &str) -> bool {
-    let target = normalize_path(realpath);
+    let target = super::normalize_path(realpath);
     for line in block {
         if let Some(value) = extract_path_value(line) {
-            let candidate = normalize_path(&value);
+            let candidate = super::normalize_path(&value);
             if candidate == target {
                 return true;
             }

@@ -50,6 +50,12 @@ pub fn scan_skills(root: &Path) -> std::io::Result<Vec<Skill>> {
     Ok(skills)
 }
 
+pub fn skills_root() -> std::io::Result<std::path::PathBuf> {
+    let home = std::env::var("HOME")
+        .map_err(|_| std::io::Error::new(std::io::ErrorKind::NotFound, "HOME not set"))?;
+    Ok(std::path::PathBuf::from(home).join(".codex").join("skills"))
+}
+
 #[cfg(test)]
 mod tests;
 #[cfg(test)]
