@@ -51,8 +51,10 @@ fn delete_skill(skill_realpath: String) -> Result<(), String> {
     if !real.starts_with(&root) {
         return Err("Refusing to delete path outside skills root".to_string());
     }
-    trash::delete(&real).map_err(|e| e.to_string())?;
-    let _ = config::set_enabled(&real.to_string_lossy(), true).map_err(|e| e.to_string())?;
+    trash::delete(&real).map_err(|e| format!("Trash failed: {e}"))?;
+    if let Err(err) = config::set_enabled(&real.to_string_lossy(), true) {
+        return Err(format!("Trash succeeded but config cleanup failed: {err}"));
+    }
     Ok(())
 }
 

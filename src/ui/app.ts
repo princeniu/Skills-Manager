@@ -55,6 +55,7 @@ export function mountApp(root: HTMLElement) {
           </select>
         </div>
       </section>
+      <div class="alert-bar" id="alertBar" hidden></div>
 
       <main class="content">
         <aside class="list-panel">
@@ -96,6 +97,7 @@ export function mountApp(root: HTMLElement) {
   const statusMeta = root.querySelector<HTMLDivElement>('#statusMeta')!
   const restartNotice = root.querySelector<HTMLDivElement>('#restartNotice')!
   const refreshBtn = root.querySelector<HTMLButtonElement>('#refreshBtn')!
+  const alertBar = root.querySelector<HTMLDivElement>('#alertBar')!
 
   searchInput.addEventListener('input', () => {
     state.query = searchInput.value.trim().toLowerCase()
@@ -277,11 +279,14 @@ export function mountApp(root: HTMLElement) {
   function setStatus(text: string) {
     statusText.textContent = text
     statusText.dataset.state = 'info'
+    alertBar.hidden = true
   }
 
   function setError(text: string) {
     statusText.textContent = text
     statusText.dataset.state = 'error'
+    alertBar.textContent = text
+    alertBar.hidden = false
   }
 
   function formatDate(epochSeconds: number) {
