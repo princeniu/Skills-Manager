@@ -245,7 +245,7 @@ body {
   border-radius: var(--radius);
   padding: 12px 14px;
   background: #ffffff;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 160ms ease, box-shadow 200ms ease, border-color 180ms ease;
   cursor: pointer;
 }
 
@@ -415,12 +415,19 @@ body {
   text-transform: uppercase;
   letter-spacing: 1px;
   cursor: pointer;
+  transition: transform 120ms ease, background-color 180ms ease, border-color 180ms ease,
+    color 180ms ease;
 }
 
 .icon-btn[data-state='copied'] {
   background: var(--accent-soft);
   border-color: var(--accent);
   color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.icon-btn:active {
+  transform: translateY(0);
 }
 
 .mono {
@@ -459,6 +466,7 @@ button.ghost {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 1px;
+  transition: background-color 160ms ease, border-color 160ms ease, transform 120ms ease;
 }
 
 button.primary {
@@ -470,6 +478,7 @@ button.primary {
   font-size: 11px;
   letter-spacing: 1px;
   text-transform: uppercase;
+  transition: background-color 160ms ease, transform 120ms ease;
 }
 
 button.danger {
@@ -481,6 +490,7 @@ button.danger {
   font-size: 11px;
   letter-spacing: 1px;
   text-transform: uppercase;
+  transition: background-color 160ms ease, transform 120ms ease;
 }
 
 .pill {

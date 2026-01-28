@@ -385,7 +385,7 @@ export function mountApp(root: HTMLElement) {
           await navigator.clipboard.writeText(value)
           btn.dataset.state = 'copied'
           const original = btn.textContent || 'Copy'
-          btn.textContent = '✓'
+          btn.textContent = 'Copied'
           setTimeout(() => {
             btn.textContent = original
             btn.dataset.state = ''
