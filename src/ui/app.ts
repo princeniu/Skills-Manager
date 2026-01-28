@@ -346,13 +346,17 @@ export function mountApp(root: HTMLElement) {
     const name = highlightText(skill.name, state.query)
     const desc = highlightText(skill.description || 'No description', state.query)
     const slug = highlightText(skill.slug, state.query)
+    const mtime = formatShortDate(skill.skill_mtime)
     return `
       <button class="skill-card ${selected ? 'selected' : ''} ${!skill.enabled ? 'disabled' : ''}" data-id="${skill.id}">
-        <div class="skill-title">${name}</div>
+        <div class="skill-head">
+          <div class="skill-title">${name}</div>
+          <span class="pill ${status}">${status}</span>
+        </div>
         <div class="skill-desc">${desc}</div>
         <div class="skill-meta">
-          <span class="pill ${status}">${status}</span>
           <span class="slug">${slug}</span>
+          <span class="mtime">${mtime}</span>
         </div>
       </button>
     `
@@ -534,6 +538,12 @@ export function mountApp(root: HTMLElement) {
     if (!epochSeconds) return '—'
     const date = new Date(epochSeconds * 1000)
     return date.toLocaleString()
+  }
+
+  function formatShortDate(epochSeconds: number) {
+    if (!epochSeconds) return '—'
+    const date = new Date(epochSeconds * 1000)
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
   }
 
   function formatError(err: unknown) {

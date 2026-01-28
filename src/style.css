@@ -417,6 +417,18 @@ body {
   border-style: dashed;
 }
 
+.skill-card:focus-visible {
+  outline: 2px solid var(--accent-500);
+  outline-offset: 2px;
+}
+
+.skill-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+}
+
 .skill-title {
   font-size: 14px;
   font-weight: 600;
@@ -446,6 +458,11 @@ body {
 
 .slug {
   font-family: var(--mono);
+}
+
+.mtime {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-300);
 }
 
 .detail-panel {
