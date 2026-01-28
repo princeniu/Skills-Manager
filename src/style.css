@@ -54,7 +54,8 @@ body::before {
   overflow: hidden;
   display: grid;
   grid-template-rows: auto auto 1fr auto;
-  min-height: 78vh;
+  height: calc(100vh - 56px);
+  min-height: 0;
 }
 
 .topbar {
@@ -179,6 +180,7 @@ body::before {
   grid-template-columns: 1.1fr 1.3fr;
   gap: 0;
   min-height: 0;
+  overflow: hidden;
 }
 
 .list-panel {
@@ -189,6 +191,7 @@ body::before {
   gap: 12px;
   background: rgba(255, 255, 255, 0.6);
   min-height: 0;
+  overflow: auto;
 }
 
 .list-meta {
@@ -265,8 +268,8 @@ body::before {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  overflow: auto;
   min-height: 0;
+  overflow: auto;
 }
 
 .detail-empty {
