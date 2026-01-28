@@ -216,13 +216,16 @@ export function mountApp(root: HTMLElement) {
       .map((skill) => {
         const selected = skill.id === state.selectedId
         const status = skill.enabled ? 'enabled' : 'disabled'
+        const name = highlightText(skill.name, state.query)
+        const desc = highlightText(skill.description || 'No description', state.query)
+        const slug = highlightText(skill.slug, state.query)
         return `
           <button class="skill-card ${selected ? 'selected' : ''} ${!skill.enabled ? 'disabled' : ''}" data-id="${skill.id}">
-            <div class="skill-title">${escapeHtml(skill.name)}</div>
-            <div class="skill-desc">${escapeHtml(skill.description || 'No description')}</div>
+            <div class="skill-title">${name}</div>
+            <div class="skill-desc">${desc}</div>
             <div class="skill-meta">
               <span class="pill ${status}">${status}</span>
-              <span class="slug">${escapeHtml(skill.slug)}</span>
+              <span class="slug">${slug}</span>
             </div>
           </button>
         `
@@ -398,6 +401,18 @@ export function mountApp(root: HTMLElement) {
       .replaceAll('>', '&gt;')
       .replaceAll('"', '&quot;')
       .replaceAll("'", '&#39;')
+  }
+
+  function escapeRegExp(value: string) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  }
+
+  function highlightText(value: string, query: string) {
+    const safe = escapeHtml(value)
+    if (!query) return safe
+    const escaped = escapeRegExp(query)
+    const regex = new RegExp(escaped, 'ig')
+    return safe.replace(regex, (match) => `<mark class="hl">${match}</mark>`)
   }
 
   function showConfirm(title: string, body: string) {

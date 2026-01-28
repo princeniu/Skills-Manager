@@ -480,6 +480,13 @@ button.danger {
   color: var(--danger);
 }
 
+.hl {
+  background: #ffefc2;
+  color: inherit;
+  border-radius: 4px;
+  padding: 0 2px;
+}
+
 @media (max-width: 960px) {
   #app {
     padding: 16px;
