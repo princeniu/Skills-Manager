@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/core'
+import { invoke, isTauri } from '@tauri-apps/api/core'
 
 export type Skill = {
   id: string
@@ -98,6 +98,7 @@ export function mountApp(root: HTMLElement) {
   const restartNotice = root.querySelector<HTMLDivElement>('#restartNotice')!
   const refreshBtn = root.querySelector<HTMLButtonElement>('#refreshBtn')!
   const alertBar = root.querySelector<HTMLDivElement>('#alertBar')!
+  const isTauriEnv = isTauri()
 
   searchInput.addEventListener('input', () => {
     state.query = searchInput.value.trim().toLowerCase()
@@ -115,6 +116,10 @@ export function mountApp(root: HTMLElement) {
 
   async function refreshSkills(showStatus = false) {
     try {
+      if (!isTauriEnv) {
+        setError('This view is for Tauri only. Please open via `npm run tauri dev`.')
+        return
+      }
       if (showStatus) setStatus('Refreshing…')
       const items = await invoke<Skill[]>('list_skills')
       state.skills = items
@@ -132,6 +137,9 @@ export function mountApp(root: HTMLElement) {
 
   async function pollFingerprint() {
     try {
+      if (!isTauriEnv) {
+        return
+      }
       const fp = await invoke<string>('get_config_fingerprint')
       if (state.fingerprint !== fp) {
         state.fingerprint = fp
@@ -312,5 +320,7 @@ export function mountApp(root: HTMLElement) {
 
   void refreshSkills(true)
   void pollFingerprint()
-  setInterval(() => void pollFingerprint(), REFRESH_INTERVAL_MS)
+  if (isTauriEnv) {
+    setInterval(() => void pollFingerprint(), REFRESH_INTERVAL_MS)
+  }
 }
