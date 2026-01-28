@@ -360,6 +360,7 @@ export function mountApp(root: HTMLElement) {
         }
         state.selectedRealpath = selected.realpath
         await refreshSkills(false)
+        showToast(selected.enabled ? 'Disabled' : 'Enabled')
         setStatus('Ready')
       } catch (err) {
         setError(`Toggle failed: ${formatError(err)}`)
