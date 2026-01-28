@@ -133,6 +133,10 @@ body {
   z-index: 50;
 }
 
+.modal-backdrop[hidden] {
+  display: none;
+}
+
 .modal {
   width: min(420px, 90vw);
   background: #ffffff;
