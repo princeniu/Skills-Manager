@@ -50,29 +50,50 @@ export function mountApp(root: HTMLElement) {
           <span class="search-icon">⌕</span>
           <input id="searchInput" type="search" placeholder="Search skills by name, slug, description" />
         </div>
-        <div class="sorter">
-          <label for="sortSelect">Sort</label>
-          <select id="sortSelect">
-            <option value="name">Name (A–Z)</option>
-            <option value="enabled">Enabled first</option>
-            <option value="mtime">Recently modified</option>
-          </select>
-        </div>
-        <div class="toggle">
-          <button class="toggle-btn" id="groupToggle" aria-pressed="false">Group</button>
-        </div>
-        <div class="filter">
-          <label for="statusFilter">Filter</label>
-          <select id="statusFilter">
-            <option value="all">All</option>
-            <option value="enabled">Enabled</option>
-            <option value="disabled">Disabled</option>
-          </select>
+        <div class="toolbar-actions">
+          <div class="sorter">
+            <label for="sortSelect">Sort</label>
+            <select id="sortSelect">
+              <option value="name">Name (A–Z)</option>
+              <option value="enabled">Enabled first</option>
+              <option value="mtime">Recently modified</option>
+            </select>
+          </div>
+          <div class="filter">
+            <label for="statusFilter">Filter</label>
+            <select id="statusFilter">
+              <option value="all">All</option>
+              <option value="enabled">Enabled</option>
+              <option value="disabled">Disabled</option>
+            </select>
+          </div>
+          <div class="toggle">
+            <button class="toggle-btn" id="groupToggle" aria-pressed="false">Group</button>
+          </div>
         </div>
       </section>
       <div class="alert-bar" id="alertBar" hidden></div>
 
       <main class="content">
+        <aside class="sidebar">
+          <div class="sidebar-title">Filters</div>
+          <button class="side-item" data-filter="all" id="filterAll">
+            <span>All skills</span>
+            <span class="side-count" id="countAll">0</span>
+          </button>
+          <button class="side-item" data-filter="enabled" id="filterEnabled">
+            <span>Enabled</span>
+            <span class="side-count" id="countEnabled">0</span>
+          </button>
+          <button class="side-item" data-filter="disabled" id="filterDisabled">
+            <span>Disabled</span>
+            <span class="side-count" id="countDisabled">0</span>
+          </button>
+          <div class="sidebar-title">Sort</div>
+          <button class="side-item" data-sort="mtime" id="sortRecent">
+            <span>Recent changes</span>
+          </button>
+        </aside>
         <aside class="list-panel">
           <div class="list-meta" id="listMeta"></div>
           <div class="skill-list" id="skillList"></div>
@@ -124,6 +145,13 @@ export function mountApp(root: HTMLElement) {
   const statusFilter = root.querySelector<HTMLSelectElement>('#statusFilter')!
   const skillList = root.querySelector<HTMLDivElement>('#skillList')!
   const listMeta = root.querySelector<HTMLDivElement>('#listMeta')!
+  const countAll = root.querySelector<HTMLSpanElement>('#countAll')!
+  const countEnabled = root.querySelector<HTMLSpanElement>('#countEnabled')!
+  const countDisabled = root.querySelector<HTMLSpanElement>('#countDisabled')!
+  const filterAll = root.querySelector<HTMLButtonElement>('#filterAll')!
+  const filterEnabled = root.querySelector<HTMLButtonElement>('#filterEnabled')!
+  const filterDisabled = root.querySelector<HTMLButtonElement>('#filterDisabled')!
+  const sortRecent = root.querySelector<HTMLButtonElement>('#sortRecent')!
   const detailView = root.querySelector<HTMLDivElement>('#detailView')!
   const detailEmpty = root.querySelector<HTMLDivElement>('#detailEmpty')!
   const statusText = root.querySelector<HTMLDivElement>('#statusText')!
@@ -158,6 +186,20 @@ export function mountApp(root: HTMLElement) {
 
   statusFilter.addEventListener('change', () => {
     state.statusFilter = statusFilter.value as AppState['statusFilter']
+    render()
+  })
+
+  ;[filterAll, filterEnabled, filterDisabled].forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.statusFilter = (btn.dataset.filter as AppState['statusFilter']) || 'all'
+      statusFilter.value = state.statusFilter
+      render()
+    })
+  })
+
+  sortRecent.addEventListener('click', () => {
+    state.sortKey = 'mtime'
+    sortSelect.value = 'mtime'
     render()
   })
 
@@ -252,6 +294,14 @@ export function mountApp(root: HTMLElement) {
     const enabledCount = state.skills.filter((s) => s.enabled).length
 
     listMeta.textContent = `${filtered.length} shown · ${enabledCount}/${state.skills.length} enabled`
+    countAll.textContent = String(state.skills.length)
+    countEnabled.textContent = String(enabledCount)
+    countDisabled.textContent = String(state.skills.length - enabledCount)
+
+    filterAll.classList.toggle('active', state.statusFilter === 'all')
+    filterEnabled.classList.toggle('active', state.statusFilter === 'enabled')
+    filterDisabled.classList.toggle('active', state.statusFilter === 'disabled')
+    sortRecent.classList.toggle('active', state.sortKey === 'mtime')
 
     if (state.groupByStatus) {
       const enabledList = filtered.filter((s) => s.enabled)
