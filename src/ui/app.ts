@@ -11,7 +11,7 @@ export type Skill = {
   skill_mtime: number
 }
 
-type SortKey = 'name' | 'enabled'
+type SortKey = 'name' | 'enabled' | 'mtime'
 
 type AppState = {
   skills: Skill[]
@@ -54,6 +54,7 @@ export function mountApp(root: HTMLElement) {
           <select id="sortSelect">
             <option value="name">Name (A–Z)</option>
             <option value="enabled">Enabled first</option>
+            <option value="mtime">Recently modified</option>
           </select>
         </div>
         <div class="toggle">
@@ -215,6 +216,8 @@ export function mountApp(root: HTMLElement) {
     const sorted = [...filtered]
     if (state.sortKey === 'enabled') {
       sorted.sort((a, b) => Number(b.enabled) - Number(a.enabled) || a.slug.localeCompare(b.slug))
+    } else if (state.sortKey === 'mtime') {
+      sorted.sort((a, b) => b.skill_mtime - a.skill_mtime || a.slug.localeCompare(b.slug))
     } else {
       sorted.sort((a, b) => a.name.localeCompare(b.name))
     }
