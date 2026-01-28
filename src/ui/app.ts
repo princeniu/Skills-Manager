@@ -20,7 +20,6 @@ type AppState = {
   selectedId: string | null
   selectedRealpath: string | null
   fingerprint: string
-  groupByStatus: boolean
   statusFilter: 'all' | 'enabled' | 'disabled'
   tagFilter: string | null
 }
@@ -123,7 +122,6 @@ export function mountApp(root: HTMLElement) {
     selectedId: null,
     selectedRealpath: null,
     fingerprint: '',
-    groupByStatus: false,
     statusFilter: 'all',
     tagFilter: null
   }
@@ -288,16 +286,7 @@ export function mountApp(root: HTMLElement) {
 
     renderTags()
 
-    if (state.groupByStatus) {
-      const enabledList = filtered.filter((s) => s.enabled)
-      const disabledList = filtered.filter((s) => !s.enabled)
-      skillList.innerHTML = `
-        ${renderGroup('Enabled', enabledList)}
-        ${renderGroup('Disabled', disabledList)}
-      `
-    } else {
-      skillList.innerHTML = filtered.map(renderCard).join('')
-    }
+    skillList.innerHTML = filtered.map(renderCard).join('')
 
     skillList.querySelectorAll<HTMLButtonElement>('.skill-card').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -311,18 +300,6 @@ export function mountApp(root: HTMLElement) {
 
     renderDetail()
     statusMeta.textContent = state.fingerprint ? `config: ${state.fingerprint.slice(0, 10)}…` : 'config: empty'
-  }
-
-  function renderGroup(label: string, list: Skill[]) {
-    if (list.length === 0) return ''
-    const count = list.length
-    return `
-      <div class="group-header">
-        <span>${label}</span>
-        <span class="group-count">${count}</span>
-      </div>
-      ${list.map(renderCard).join('')}
-    `
   }
 
   function renderTags() {

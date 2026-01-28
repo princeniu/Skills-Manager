@@ -377,22 +377,6 @@ body {
   padding-right: 8px;
 }
 
-.group-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1.4px;
-  color: var(--text-300);
-  margin-top: 6px;
-  grid-column: 1 / -1;
-}
-
-.group-count {
-  font-variant-numeric: tabular-nums;
-}
-
 .skill-card {
   text-align: left;
   border: 1px solid var(--border-600);
