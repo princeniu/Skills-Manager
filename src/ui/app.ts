@@ -179,7 +179,7 @@ export function mountApp(root: HTMLElement) {
         const selected = skill.id === state.selectedId
         const status = skill.enabled ? 'enabled' : 'disabled'
         return `
-          <button class="skill-card ${selected ? 'selected' : ''}" data-id="${skill.id}">
+          <button class="skill-card ${selected ? 'selected' : ''} ${!skill.enabled ? 'disabled' : ''}" data-id="${skill.id}">
             <div class="skill-title">${escapeHtml(skill.name)}</div>
             <div class="skill-desc">${escapeHtml(skill.description || 'No description')}</div>
             <div class="skill-meta">
@@ -215,6 +215,8 @@ export function mountApp(root: HTMLElement) {
     detailView.hidden = false
 
     const status = selected.enabled ? 'enabled' : 'disabled'
+    const toggleLabel = selected.enabled ? 'Disable' : 'Enable'
+    const toggleClass = selected.enabled ? 'danger' : 'primary'
     detailView.innerHTML = `
       <div class="detail-header">
         <div>
@@ -223,9 +225,12 @@ export function mountApp(root: HTMLElement) {
         </div>
         <div class="pill ${status}">${status}</div>
       </div>
+      <div class="detail-status ${status}">
+        ${selected.enabled ? 'Enabled' : 'Disabled'} · 重启 Codex 生效
+      </div>
       <div class="detail-description">${escapeHtml(selected.description || 'No description found in SKILL.md.')}</div>
       <div class="detail-actions">
-        <button class="primary" id="toggleBtn">${selected.enabled ? 'Disable' : 'Enable'}</button>
+        <button class="${toggleClass}" id="toggleBtn">${toggleLabel}</button>
         <button class="danger" id="deleteBtn">Delete</button>
       </div>
       <div class="detail-grid">

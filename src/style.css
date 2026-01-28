@@ -226,6 +226,12 @@ body::before {
   box-shadow: 0 16px 30px rgba(192, 74, 43, 0.15);
 }
 
+.skill-card.disabled {
+  opacity: 0.6;
+  background: #f5eee6;
+  border-style: dashed;
+}
+
 .skill-title {
   font-family: var(--display);
   font-size: 18px;
@@ -308,6 +314,21 @@ body::before {
   font-size: 14px;
   line-height: 1.5;
   color: #5a4c40;
+}
+
+.detail-status {
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: rgba(15, 91, 76, 0.12);
+  color: var(--accent-2);
+}
+
+.detail-status.disabled {
+  background: rgba(192, 74, 43, 0.12);
+  color: var(--accent);
 }
 
 .detail-actions {
