@@ -417,6 +417,12 @@ body {
   cursor: pointer;
 }
 
+.icon-btn[data-state='copied'] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .mono {
   font-family: var(--mono);
 }

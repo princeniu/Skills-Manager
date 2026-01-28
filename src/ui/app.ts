@@ -383,6 +383,13 @@ export function mountApp(root: HTMLElement) {
         const value = btn.dataset.copy || ''
         try {
           await navigator.clipboard.writeText(value)
+          btn.dataset.state = 'copied'
+          const original = btn.textContent || 'Copy'
+          btn.textContent = '✓'
+          setTimeout(() => {
+            btn.textContent = original
+            btn.dataset.state = ''
+          }, 1200)
           setStatus('Copied')
         } catch (err) {
           setError(`Copy failed: ${formatError(err)}`)
