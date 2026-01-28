@@ -18,6 +18,7 @@ type AppState = {
   query: string
   sortKey: SortKey
   selectedId: string | null
+  selectedRealpath: string | null
   fingerprint: string
 }
 
@@ -84,6 +85,7 @@ export function mountApp(root: HTMLElement) {
     query: '',
     sortKey: 'name',
     selectedId: null,
+    selectedRealpath: null,
     fingerprint: ''
   }
 
@@ -123,7 +125,10 @@ export function mountApp(root: HTMLElement) {
       if (showStatus) setStatus('Refreshing…')
       const items = await invoke<Skill[]>('list_skills')
       state.skills = items
-      if (state.selectedId && !items.find((s) => s.id === state.selectedId)) {
+      if (state.selectedRealpath) {
+        const match = items.find((s) => s.realpath === state.selectedRealpath)
+        state.selectedId = match ? match.id : null
+      } else if (state.selectedId && !items.find((s) => s.id === state.selectedId)) {
         state.selectedId = null
       }
       setStatus('Ready')
@@ -194,6 +199,8 @@ export function mountApp(root: HTMLElement) {
     skillList.querySelectorAll<HTMLButtonElement>('.skill-card').forEach((btn) => {
       btn.addEventListener('click', () => {
         state.selectedId = btn.dataset.id || null
+        const selected = state.skills.find((s) => s.id === state.selectedId)
+        state.selectedRealpath = selected?.realpath ?? null
         renderDetail()
         render()
       })
@@ -266,6 +273,7 @@ export function mountApp(root: HTMLElement) {
         if (result) {
           restartNotice.hidden = false
         }
+        state.selectedRealpath = selected.realpath
         await refreshSkills(false)
         setStatus('Ready')
       } catch (err) {
