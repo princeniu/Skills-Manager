@@ -89,7 +89,13 @@ pub fn disabled_paths() -> std::io::Result<HashSet<String>> {
             if canonical.is_none() {
                 log::warn!("Non-resolvable path in config, using expanded path: {}", expanded);
             }
-            path_value = canonical.or(Some(expanded));
+            // keep most-resolved path for the block, but also track raw/expanded variants
+            path_value = canonical.clone().or(Some(expanded.clone()));
+            disabled.insert(value);
+            disabled.insert(expanded);
+            if let Some(c) = canonical {
+                disabled.insert(c);
+            }
         } else if trimmed.starts_with("enabled") {
             enabled_value = Some(trimmed.contains("false"));
         }
