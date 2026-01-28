@@ -230,6 +230,7 @@ export function mountApp(root: HTMLElement) {
     const selected = state.skills.find((s) => s.id === state.selectedId) || null
     if (!selected) {
       detailView.hidden = true
+      detailView.innerHTML = ''
       detailEmpty.hidden = false
       return
     }
@@ -306,6 +307,8 @@ export function mountApp(root: HTMLElement) {
       try {
         setStatus('Deleting…')
         await invoke('delete_skill', { skillRealpath: selected.realpath })
+        state.selectedId = null
+        state.selectedRealpath = null
         await refreshSkills(false)
         setStatus('Ready')
       } catch (err) {

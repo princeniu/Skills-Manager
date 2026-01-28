@@ -308,6 +308,11 @@ body {
   color: var(--muted);
 }
 
+.detail-empty[hidden],
+.detail-view[hidden] {
+  display: none;
+}
+
 .empty-mark {
   font-size: 26px;
   margin-bottom: 8px;
