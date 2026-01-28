@@ -578,7 +578,28 @@ body {
 
 .detail-actions {
   display: flex;
+  flex-direction: column;
   gap: 12px;
+  padding: 12px;
+  border-radius: var(--radius-btn);
+  border: 1px solid var(--border-600);
+  background: #151a20;
+}
+
+.action-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.primary-action {
+  min-width: 140px;
+}
+
+.action-divider {
+  height: 1px;
+  background: var(--border-600);
+  opacity: 0.6;
 }
 
 .detail-grid {
@@ -699,6 +720,12 @@ button.danger {
   letter-spacing: 1px;
   text-transform: uppercase;
   transition: background-color 160ms ease, transform 120ms ease;
+}
+
+.ghost-danger {
+  background: transparent;
+  border: 1px solid rgba(227, 92, 92, 0.5);
+  color: var(--danger-500);
 }
 
 .pill {

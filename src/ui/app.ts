@@ -433,8 +433,13 @@ export function mountApp(root: HTMLElement) {
       </div>
       <div class="detail-description">${escapeHtml(selected.description || 'No description found in SKILL.md.')}</div>
       <div class="detail-actions">
-        <button class="${toggleClass}" id="toggleBtn">${toggleLabel}</button>
-        <button class="danger" id="deleteBtn">Delete</button>
+        <div class="action-row">
+          <button class="${toggleClass} primary-action" id="toggleBtn">${toggleLabel}</button>
+        </div>
+        <div class="action-divider"></div>
+        <div class="action-row">
+          <button class="danger ghost-danger" id="deleteBtn">Delete</button>
+        </div>
       </div>
       <div class="detail-grid">
         <div class="detail-item">
