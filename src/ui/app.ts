@@ -21,6 +21,7 @@ type AppState = {
   selectedRealpath: string | null
   fingerprint: string
   groupByStatus: boolean
+  statusFilter: 'all' | 'enabled' | 'disabled'
 }
 
 const REFRESH_INTERVAL_MS = 5000
@@ -59,6 +60,14 @@ export function mountApp(root: HTMLElement) {
         </div>
         <div class="toggle">
           <button class="toggle-btn" id="groupToggle" aria-pressed="false">Group</button>
+        </div>
+        <div class="filter">
+          <label for="statusFilter">Filter</label>
+          <select id="statusFilter">
+            <option value="all">All</option>
+            <option value="enabled">Enabled</option>
+            <option value="disabled">Disabled</option>
+          </select>
         </div>
       </section>
       <div class="alert-bar" id="alertBar" hidden></div>
@@ -105,12 +114,14 @@ export function mountApp(root: HTMLElement) {
     selectedId: null,
     selectedRealpath: null,
     fingerprint: '',
-    groupByStatus: false
+    groupByStatus: false,
+    statusFilter: 'all'
   }
 
   const searchInput = root.querySelector<HTMLInputElement>('#searchInput')!
   const sortSelect = root.querySelector<HTMLSelectElement>('#sortSelect')!
   const groupToggle = root.querySelector<HTMLButtonElement>('#groupToggle')!
+  const statusFilter = root.querySelector<HTMLSelectElement>('#statusFilter')!
   const skillList = root.querySelector<HTMLDivElement>('#skillList')!
   const listMeta = root.querySelector<HTMLDivElement>('#listMeta')!
   const detailView = root.querySelector<HTMLDivElement>('#detailView')!
@@ -142,6 +153,11 @@ export function mountApp(root: HTMLElement) {
     state.groupByStatus = !state.groupByStatus
     groupToggle.setAttribute('aria-pressed', String(state.groupByStatus))
     groupToggle.classList.toggle('active', state.groupByStatus)
+    render()
+  })
+
+  statusFilter.addEventListener('change', () => {
+    state.statusFilter = statusFilter.value as AppState['statusFilter']
     render()
   })
 
@@ -211,6 +227,12 @@ export function mountApp(root: HTMLElement) {
         const hay = `${skill.name} ${skill.slug} ${skill.description}`.toLowerCase()
         return hay.includes(query)
       })
+    }
+
+    if (state.statusFilter === 'enabled') {
+      filtered = filtered.filter((skill) => skill.enabled)
+    } else if (state.statusFilter === 'disabled') {
+      filtered = filtered.filter((skill) => !skill.enabled)
     }
 
     const sorted = [...filtered]
