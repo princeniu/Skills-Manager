@@ -311,15 +311,24 @@ export function mountApp(root: HTMLElement) {
       </div>
       <div class="detail-grid">
         <div class="detail-item">
-          <div class="detail-label">Real Path</div>
+          <div class="detail-label">
+            Real Path
+            <button class="icon-btn" data-copy="${escapeHtml(selected.realpath)}" aria-label="Copy real path">Copy</button>
+          </div>
           <div class="detail-value">${escapeHtml(selected.realpath)}</div>
         </div>
         <div class="detail-item">
-          <div class="detail-label">Path</div>
+          <div class="detail-label">
+            Path
+            <button class="icon-btn" data-copy="${escapeHtml(selected.path)}" aria-label="Copy path">Copy</button>
+          </div>
           <div class="detail-value">${escapeHtml(selected.path)}</div>
         </div>
         <div class="detail-item">
-          <div class="detail-label">Skill ID</div>
+          <div class="detail-label">
+            Skill ID
+            <button class="icon-btn" data-copy="${escapeHtml(selected.id)}" aria-label="Copy skill id">Copy</button>
+          </div>
           <div class="detail-value mono">${escapeHtml(selected.id)}</div>
         </div>
         <div class="detail-item">
@@ -331,6 +340,7 @@ export function mountApp(root: HTMLElement) {
 
     const toggleBtn = detailView.querySelector<HTMLButtonElement>('#toggleBtn')!
     const deleteBtn = detailView.querySelector<HTMLButtonElement>('#deleteBtn')!
+    const copyButtons = detailView.querySelectorAll<HTMLButtonElement>('[data-copy]')
 
     toggleBtn.addEventListener('click', async () => {
       try {
@@ -366,6 +376,18 @@ export function mountApp(root: HTMLElement) {
       } catch (err) {
         setError(`Delete failed: ${formatError(err)}`)
       }
+    })
+
+    copyButtons.forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const value = btn.dataset.copy || ''
+        try {
+          await navigator.clipboard.writeText(value)
+          setStatus('Copied')
+        } catch (err) {
+          setError(`Copy failed: ${formatError(err)}`)
+        }
+      })
     })
   }
 

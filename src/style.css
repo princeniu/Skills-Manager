@@ -394,12 +394,27 @@ body {
   letter-spacing: 1.2px;
   color: var(--muted);
   margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .detail-value {
   font-size: 12px;
   color: var(--ink);
   word-break: break-all;
+}
+
+.icon-btn {
+  border: 1px solid var(--border);
+  background: #ffffff;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
 }
 
 .mono {
