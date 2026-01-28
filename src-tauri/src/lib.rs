@@ -52,6 +52,7 @@ fn list_skills() -> Result<Vec<skills::types::Skill>, String> {
       }
     }
 
+    let disabled_result = std::thread::spawn(|| config::disabled_paths());
     if !used_cache {
       items = skills::scan_skills(&root).map_err(|e| e.to_string())?;
       if let Ok(mut cache) = SKILL_CACHE.lock() {
@@ -59,7 +60,8 @@ fn list_skills() -> Result<Vec<skills::types::Skill>, String> {
         cache.skills = items.clone();
       }
     }
-    let disabled = config::disabled_paths().map_err(|e| e.to_string())?;
+    let disabled = disabled_result.join().map_err(|_| "Failed to read config".to_string())?
+      .map_err(|e| e.to_string())?;
     for item in &mut items {
         let norm_real = config::normalize_path(&item.realpath);
         let norm_path = config::normalize_path(&item.path);
