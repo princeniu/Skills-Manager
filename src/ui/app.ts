@@ -77,6 +77,17 @@ export function mountApp(root: HTMLElement) {
         <div id="statusText">Ready</div>
         <div class="status-meta" id="statusMeta"></div>
       </footer>
+
+      <div class="modal-backdrop" id="confirmBackdrop" hidden>
+        <div class="modal">
+          <div class="modal-title" id="confirmTitle">Delete skill?</div>
+          <div class="modal-body" id="confirmBody">This will move the folder to Trash.</div>
+          <div class="modal-actions">
+            <button class="ghost" id="confirmCancel">Cancel</button>
+            <button class="danger" id="confirmOk">Delete</button>
+          </div>
+        </div>
+      </div>
     </div>
   `
 
@@ -100,6 +111,11 @@ export function mountApp(root: HTMLElement) {
   const restartNotice = root.querySelector<HTMLDivElement>('#restartNotice')!
   const refreshBtn = root.querySelector<HTMLButtonElement>('#refreshBtn')!
   const alertBar = root.querySelector<HTMLDivElement>('#alertBar')!
+  const confirmBackdrop = root.querySelector<HTMLDivElement>('#confirmBackdrop')!
+  const confirmTitle = root.querySelector<HTMLDivElement>('#confirmTitle')!
+  const confirmBody = root.querySelector<HTMLDivElement>('#confirmBody')!
+  const confirmCancel = root.querySelector<HTMLButtonElement>('#confirmCancel')!
+  const confirmOk = root.querySelector<HTMLButtonElement>('#confirmOk')!
   const isTauriEnv = isTauri()
 
   searchInput.addEventListener('input', () => {
@@ -282,7 +298,10 @@ export function mountApp(root: HTMLElement) {
     })
 
     deleteBtn.addEventListener('click', async () => {
-      const confirmed = confirm(`Delete ${selected.name}? This moves it to Trash.`)
+      const confirmed = await showConfirm(
+        `Delete ${selected.name}?`,
+        'This will move the folder to Trash.'
+      )
       if (!confirmed) return
       try {
         setStatus('Deleting…')
@@ -327,6 +346,34 @@ export function mountApp(root: HTMLElement) {
       .replaceAll('>', '&gt;')
       .replaceAll('"', '&quot;')
       .replaceAll("'", '&#39;')
+  }
+
+  function showConfirm(title: string, body: string) {
+    return new Promise<boolean>((resolve) => {
+      confirmTitle.textContent = title
+      confirmBody.textContent = body
+      confirmBackdrop.hidden = false
+
+      const cleanup = (result: boolean) => {
+        confirmBackdrop.hidden = true
+        confirmCancel.removeEventListener('click', onCancel)
+        confirmOk.removeEventListener('click', onOk)
+        confirmBackdrop.removeEventListener('click', onBackdrop)
+        resolve(result)
+      }
+
+      const onCancel = () => cleanup(false)
+      const onOk = () => cleanup(true)
+      const onBackdrop = (event: MouseEvent) => {
+        if (event.target === confirmBackdrop) {
+          cleanup(false)
+        }
+      }
+
+      confirmCancel.addEventListener('click', onCancel)
+      confirmOk.addEventListener('click', onOk)
+      confirmBackdrop.addEventListener('click', onBackdrop)
+    })
   }
 
   void refreshSkills(true)
