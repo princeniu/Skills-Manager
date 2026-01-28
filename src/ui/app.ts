@@ -22,6 +22,7 @@ type AppState = {
   fingerprint: string
   groupByStatus: boolean
   statusFilter: 'all' | 'enabled' | 'disabled'
+  tagFilter: string | null
 }
 
 const REFRESH_INTERVAL_MS = 5000
@@ -93,6 +94,8 @@ export function mountApp(root: HTMLElement) {
           <button class="side-item" data-sort="mtime" id="sortRecent">
             <span>Recent changes</span>
           </button>
+          <div class="sidebar-title">Tags</div>
+          <div class="tag-list" id="tagList"></div>
         </aside>
         <aside class="list-panel">
           <div class="list-meta" id="listMeta"></div>
@@ -136,7 +139,8 @@ export function mountApp(root: HTMLElement) {
     selectedRealpath: null,
     fingerprint: '',
     groupByStatus: false,
-    statusFilter: 'all'
+    statusFilter: 'all',
+    tagFilter: null
   }
 
   const searchInput = root.querySelector<HTMLInputElement>('#searchInput')!
@@ -148,6 +152,7 @@ export function mountApp(root: HTMLElement) {
   const countAll = root.querySelector<HTMLSpanElement>('#countAll')!
   const countEnabled = root.querySelector<HTMLSpanElement>('#countEnabled')!
   const countDisabled = root.querySelector<HTMLSpanElement>('#countDisabled')!
+  const tagList = root.querySelector<HTMLDivElement>('#tagList')!
   const filterAll = root.querySelector<HTMLButtonElement>('#filterAll')!
   const filterEnabled = root.querySelector<HTMLButtonElement>('#filterEnabled')!
   const filterDisabled = root.querySelector<HTMLButtonElement>('#filterDisabled')!
@@ -192,6 +197,7 @@ export function mountApp(root: HTMLElement) {
   ;[filterAll, filterEnabled, filterDisabled].forEach((btn) => {
     btn.addEventListener('click', () => {
       state.statusFilter = (btn.dataset.filter as AppState['statusFilter']) || 'all'
+      state.tagFilter = null
       statusFilter.value = state.statusFilter
       render()
     })
@@ -277,6 +283,10 @@ export function mountApp(root: HTMLElement) {
       filtered = filtered.filter((skill) => !skill.enabled)
     }
 
+    if (state.tagFilter) {
+      filtered = filtered.filter((skill) => getTags(skill).includes(state.tagFilter!))
+    }
+
     const sorted = [...filtered]
     if (state.sortKey === 'enabled') {
       sorted.sort((a, b) => Number(b.enabled) - Number(a.enabled) || a.slug.localeCompare(b.slug))
@@ -302,6 +312,8 @@ export function mountApp(root: HTMLElement) {
     filterEnabled.classList.toggle('active', state.statusFilter === 'enabled')
     filterDisabled.classList.toggle('active', state.statusFilter === 'disabled')
     sortRecent.classList.toggle('active', state.sortKey === 'mtime')
+
+    renderTags()
 
     if (state.groupByStatus) {
       const enabledList = filtered.filter((s) => s.enabled)
@@ -338,6 +350,38 @@ export function mountApp(root: HTMLElement) {
       </div>
       ${list.map(renderCard).join('')}
     `
+  }
+
+  function renderTags() {
+    const counts = new Map<string, number>()
+    state.skills.forEach((skill) => {
+      getTags(skill).forEach((tag) => {
+        counts.set(tag, (counts.get(tag) || 0) + 1)
+      })
+    })
+
+    const tags = Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .slice(0, 12)
+
+    tagList.innerHTML = tags
+      .map(
+        ([tag, count]) => `
+          <button class="tag-item ${state.tagFilter === tag ? 'active' : ''}" data-tag="${escapeHtml(tag)}">
+            <span class="tag-label">${escapeHtml(tag)}</span>
+            <span class="tag-count">${count}</span>
+          </button>
+        `
+      )
+      .join('')
+
+    tagList.querySelectorAll<HTMLButtonElement>('.tag-item').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tag = btn.dataset.tag || null
+        state.tagFilter = state.tagFilter === tag ? null : tag
+        render()
+      })
+    })
   }
 
   function renderCard(skill: Skill) {
