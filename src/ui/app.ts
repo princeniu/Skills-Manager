@@ -132,6 +132,23 @@ export function mountApp(root: HTMLElement) {
     void refreshSkills(true)
   })
 
+  window.addEventListener('keydown', (event) => {
+    const target = event.target as HTMLElement | null
+    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
+      return
+    }
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      moveSelection(1)
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      moveSelection(-1)
+    } else if (event.key === 'Enter') {
+      event.preventDefault()
+      void toggleSelected()
+    }
+  })
+
   async function refreshSkills(showStatus = false) {
     try {
       if (!isTauriEnv) {
@@ -224,6 +241,38 @@ export function mountApp(root: HTMLElement) {
 
     renderDetail()
     statusMeta.textContent = state.fingerprint ? `config: ${state.fingerprint.slice(0, 10)}…` : 'config: empty'
+  }
+
+  function moveSelection(delta: number) {
+    const filtered = getFilteredSkills()
+    if (filtered.length === 0) return
+    const currentIndex = filtered.findIndex((s) => s.id === state.selectedId)
+    const nextIndex = currentIndex === -1 ? 0 : Math.min(filtered.length - 1, Math.max(0, currentIndex + delta))
+    const next = filtered[nextIndex]
+    state.selectedId = next.id
+    state.selectedRealpath = next.realpath
+    renderDetail()
+    render()
+  }
+
+  async function toggleSelected() {
+    const selected = state.skills.find((s) => s.id === state.selectedId)
+    if (!selected) return
+    try {
+      setStatus(selected.enabled ? 'Disabling…' : 'Enabling…')
+      const result = await invoke<string>('set_enabled', {
+        skillRealpath: selected.realpath,
+        enabled: !selected.enabled
+      })
+      if (result) {
+        restartNotice.hidden = false
+      }
+      state.selectedRealpath = selected.realpath
+      await refreshSkills(false)
+      setStatus('Ready')
+    } catch (err) {
+      setError(`Toggle failed: ${formatError(err)}`)
+    }
   }
 
   function renderDetail() {
