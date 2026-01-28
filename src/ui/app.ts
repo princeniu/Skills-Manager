@@ -345,8 +345,8 @@ export function mountApp(root: HTMLElement) {
     const status = skill.enabled ? 'enabled' : 'disabled'
     const name = highlightText(skill.name, state.query)
     const desc = highlightText(skill.description || 'No description', state.query)
-    const slug = highlightText(skill.slug, state.query)
     const mtime = formatShortDate(skill.skill_mtime)
+    const tags = getTags(skill).slice(0, 2)
     return `
       <button class="skill-card ${selected ? 'selected' : ''} ${!skill.enabled ? 'disabled' : ''}" data-id="${skill.id}">
         <div class="skill-head">
@@ -355,7 +355,9 @@ export function mountApp(root: HTMLElement) {
         </div>
         <div class="skill-desc">${desc}</div>
         <div class="skill-meta">
-          <span class="slug">${slug}</span>
+          <div class="tag-row">
+            ${tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
+          </div>
           <span class="mtime">${mtime}</span>
         </div>
       </button>
@@ -416,7 +418,12 @@ export function mountApp(root: HTMLElement) {
       <div class="detail-header">
         <div>
           <div class="detail-title">${escapeHtml(selected.name)}</div>
-          <div class="detail-sub">${escapeHtml(selected.slug)}</div>
+          <div class="detail-tags">
+            ${getTags(selected)
+              .slice(0, 4)
+              .map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`)
+              .join('')}
+          </div>
         </div>
         <div class="pill ${status}">${status}</div>
       </div>
@@ -571,6 +578,26 @@ export function mountApp(root: HTMLElement) {
     const escaped = escapeRegExp(query)
     const regex = new RegExp(escaped, 'ig')
     return safe.replace(regex, (match) => `<mark class="hl">${match}</mark>`)
+  }
+
+  function getTags(skill: Skill) {
+    const hay = `${skill.slug} ${skill.name} ${skill.description}`.toLowerCase()
+    const tags: string[] = []
+    const add = (label: string) => {
+      if (!tags.includes(label)) tags.push(label)
+    }
+
+    if (/(security|pentest|vuln|attack|exploit|xss|sql|idor|auth|privilege)/.test(hay)) add('Security')
+    if (/(frontend|ui|ux|design|css|react|web|tailwind)/.test(hay)) add('Frontend')
+    if (/(backend|api|server|node|database|prisma|graphql)/.test(hay)) add('Backend')
+    if (/(cloud|aws|gcp|azure|devops|docker|k8s|infra)/.test(hay)) add('Infra')
+    if (/(ml|ai|agent|llm|prompt|rag|nlp)/.test(hay)) add('AI')
+    if (/(testing|test|qa|debug)/.test(hay)) add('Testing')
+    if (/(mobile|ios|android|swift|react native)/.test(hay)) add('Mobile')
+    if (/(game|unity|unreal|3d|2d|webgl)/.test(hay)) add('Game')
+    if (/(marketing|seo|growth|copy|ads|content)/.test(hay)) add('Marketing')
+    if (tags.length === 0) tags.push('General')
+    return tags
   }
 
   function showConfirm(title: string, body: string) {

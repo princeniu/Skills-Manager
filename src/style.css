@@ -456,12 +456,24 @@ body {
   color: var(--text-300);
 }
 
-.slug {
-  font-family: var(--mono);
+.tag-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .mtime {
   font-variant-numeric: tabular-nums;
+  color: var(--text-300);
+}
+
+.tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.08);
   color: var(--text-300);
 }
 
@@ -514,11 +526,11 @@ body {
   font-weight: 600;
 }
 
-.detail-sub {
-  font-size: 11px;
-  color: var(--text-300);
-  letter-spacing: 1.6px;
-  text-transform: uppercase;
+.detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
 }
 
 .detail-description {
