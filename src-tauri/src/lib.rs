@@ -20,6 +20,7 @@ pub fn run() {
       list_skills,
       set_enabled,
       delete_skill,
+      open_skill_location,
       get_config_fingerprint
     ])
     .setup(|app| {
@@ -102,6 +103,46 @@ fn delete_skill(skill_realpath: String) -> Result<(), String> {
         return Err(format!("Trash succeeded but config cleanup failed: {err}"));
     }
     Ok(())
+}
+
+#[tauri::command]
+fn open_skill_location(skill_realpath: String) -> Result<(), String> {
+    let real = std::fs::canonicalize(&skill_realpath).map_err(|e| e.to_string())?;
+    if !real.exists() {
+        return Err("Path does not exist".to_string());
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        std::process::Command::new("open")
+            .arg("-R")
+            .arg(&real)
+            .status()
+            .map_err(|e| e.to_string())?;
+        return Ok(());
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        std::process::Command::new("explorer")
+            .arg("/select,")
+            .arg(&real)
+            .status()
+            .map_err(|e| e.to_string())?;
+        return Ok(());
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        std::process::Command::new("xdg-open")
+            .arg(&real)
+            .status()
+            .map_err(|e| e.to_string())?;
+        return Ok(());
+    }
+
+    #[allow(unreachable_code)]
+    Err("Unsupported platform".to_string())
 }
 
 #[tauri::command]

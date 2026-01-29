@@ -540,6 +540,7 @@ export function mountApp(root: HTMLElement) {
           <div class="detail-label">
             ${t('realPath')}
             <button class="icon-btn" data-copy="${escapeHtml(selected.realpath)}" aria-label="${t('copy')}">${t('copy')}</button>
+            <button class="icon-btn" id="openPathBtn" aria-label="${t('open')}">${t('open')}</button>
           </div>
           <div class="detail-value">${escapeHtml(selected.realpath)}</div>
         </div>
@@ -553,6 +554,7 @@ export function mountApp(root: HTMLElement) {
 
     const toggleBtn = detailView.querySelector<HTMLButtonElement>('#toggleBtn')!
     const deleteBtn = detailView.querySelector<HTMLButtonElement>('#deleteBtn')!
+    const openPathBtn = detailView.querySelector<HTMLButtonElement>('#openPathBtn')!
     const copyButtons = detailView.querySelectorAll<HTMLButtonElement>('[data-copy]')
 
     toggleBtn.addEventListener('click', async () => {
@@ -590,6 +592,16 @@ export function mountApp(root: HTMLElement) {
         setStatus(t('ready'))
       } catch (err) {
         setError(`${t('deleteFailed')}: ${formatError(err)}`)
+      }
+    })
+
+    openPathBtn.addEventListener('click', async () => {
+      try {
+        setStatus(t('opening'))
+        await invoke('open_skill_location', { skillRealpath: selected.realpath })
+        setStatus(t('ready'))
+      } catch (err) {
+        setError(`${t('openFailed')}: ${formatError(err)}`)
       }
     })
 
@@ -854,6 +866,9 @@ export function mountApp(root: HTMLElement) {
       toggleFailed: 'Toggle failed',
       deleteFailed: 'Delete failed',
       copyFailed: 'Copy failed',
+      open: 'Open',
+      opening: 'Opening…',
+      openFailed: 'Open failed',
       tagLabels: {
         security: 'Security',
         frontend: 'Frontend',
@@ -917,6 +932,9 @@ export function mountApp(root: HTMLElement) {
       toggleFailed: '切换失败',
       deleteFailed: '删除失败',
       copyFailed: '复制失败',
+      open: '打开',
+      opening: '正在打开…',
+      openFailed: '打开失败',
       tagLabels: {
         security: '安全',
         frontend: '前端',
