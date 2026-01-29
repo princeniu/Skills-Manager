@@ -916,4 +916,3 @@ export function mountApp(root: HTMLElement) {
 
   applyLanguage()
 }
-  const settingsBtnLabel = root.querySelector<HTMLSpanElement>('#settingsBtnLabel')!
