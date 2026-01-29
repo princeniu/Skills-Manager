@@ -467,6 +467,7 @@ export function mountApp(root: HTMLElement) {
           <div class="detail-value">${formatDate(selected.skill_mtime)}</div>
         </div>
       </div>
+      <div class="detail-meta-note">Paths are shown for transparency and troubleshooting.</div>
     `
 
     const toggleBtn = detailView.querySelector<HTMLButtonElement>('#toggleBtn')!

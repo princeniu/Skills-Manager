@@ -633,6 +633,12 @@ body {
   word-break: break-all;
 }
 
+.detail-meta-note {
+  font-size: 11px;
+  color: var(--text-300);
+  padding: 6px 4px 0;
+}
+
 .icon-btn {
   border: 1px solid var(--border-600);
   background: #161a20;
