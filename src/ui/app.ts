@@ -100,11 +100,6 @@ export function mountApp(root: HTMLElement) {
         </section>
       </main>
 
-      <footer class="statusbar">
-        <div id="statusText"></div>
-        <div class="status-meta" id="statusMeta"></div>
-      </footer>
-
       <div class="toast" id="toast" hidden></div>
 
       <div class="modal-backdrop" id="confirmBackdrop" hidden>
@@ -179,8 +174,8 @@ export function mountApp(root: HTMLElement) {
   const sortRecent = root.querySelector<HTMLButtonElement>('#sortRecent')!
   const detailView = root.querySelector<HTMLDivElement>('#detailView')!
   const detailEmpty = root.querySelector<HTMLDivElement>('#detailEmpty')!
-  const statusText = root.querySelector<HTMLDivElement>('#statusText')!
-  const statusMeta = root.querySelector<HTMLDivElement>('#statusMeta')!
+  const statusText = document.createElement('div')
+  statusText.id = 'statusText'
   const restartNotice = root.querySelector<HTMLDivElement>('#restartNotice')!
   const refreshBtn = root.querySelector<HTMLButtonElement>('#refreshBtn')!
   const alertBar = root.querySelector<HTMLDivElement>('#alertBar')!
@@ -389,7 +384,6 @@ export function mountApp(root: HTMLElement) {
     })
 
     renderDetail()
-    statusMeta.textContent = state.fingerprint ? `config: ${state.fingerprint.slice(0, 10)}…` : 'config: empty'
   }
 
   function renderTags() {

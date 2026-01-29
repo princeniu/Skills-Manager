@@ -898,23 +898,6 @@ button:focus-visible,
   font-family: var(--mono);
 }
 
-.statusbar {
-  padding: 10px 20px;
-  border-top: 1px solid var(--border-600);
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  background: #161a20;
-}
-
-.statusbar [data-state='error'] {
-  color: var(--danger-500);
-}
-
-.status-meta {
-  font-family: var(--mono);
-  color: var(--text-300);
-}
 
 button {
   border: none;
