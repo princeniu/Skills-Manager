@@ -538,9 +538,11 @@ export function mountApp(root: HTMLElement) {
       <div class="detail-grid">
         <div class="detail-item full">
           <div class="detail-label">
-            ${t('realPath')}
-            <button class="icon-btn" data-copy="${escapeHtml(selected.realpath)}" aria-label="${t('copy')}">${t('copy')}</button>
-            <button class="icon-btn" id="openPathBtn" aria-label="${t('open')}">${t('open')}</button>
+            <span>${t('realPath')}</span>
+            <div class="detail-actions-inline">
+              <button class="icon-btn" data-copy="${escapeHtml(selected.realpath)}" aria-label="${t('copy')}">${t('copy')}</button>
+              <button class="icon-btn" id="openPathBtn" aria-label="${t('open')}">${t('open')}</button>
+            </div>
           </div>
           <div class="detail-value">${escapeHtml(selected.realpath)}</div>
         </div>

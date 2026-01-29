@@ -851,6 +851,12 @@ button:focus-visible,
   gap: 8px;
 }
 
+.detail-actions-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .detail-value {
   font-size: 12px;
   color: var(--text-100);
