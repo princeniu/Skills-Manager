@@ -835,6 +835,10 @@ button:focus-visible,
   background: var(--card-700);
 }
 
+.detail-item.full {
+  grid-column: 1 / -1;
+}
+
 .detail-label {
   font-size: 10px;
   text-transform: uppercase;
