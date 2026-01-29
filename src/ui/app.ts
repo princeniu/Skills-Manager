@@ -610,9 +610,9 @@ export function mountApp(root: HTMLElement) {
           const original = btn.textContent || t('copy')
           btn.textContent = t('copied')
           setTimeout(() => {
-          btn.textContent = original
-          btn.dataset.state = ''
-        }, 1200)
+            btn.textContent = original
+            btn.dataset.state = ''
+          }, 1200)
           showToast(t('copied'))
           setStatus(t('copied'))
         } catch (err) {
