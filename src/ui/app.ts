@@ -545,13 +545,6 @@ export function mountApp(root: HTMLElement) {
         </div>
         <div class="detail-item">
           <div class="detail-label">
-            ${t('path')}
-            <button class="icon-btn" data-copy="${escapeHtml(selected.path)}" aria-label="${t('copy')}">${t('copy')}</button>
-          </div>
-          <div class="detail-value">${escapeHtml(selected.path)}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label">
             ${t('skillId')}
             <button class="icon-btn" data-copy="${escapeHtml(selected.id)}" aria-label="${t('copy')}">${t('copy')}</button>
           </div>
