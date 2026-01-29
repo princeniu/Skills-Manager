@@ -22,6 +22,7 @@ type AppState = {
   fingerprint: string
   statusFilter: 'all' | 'enabled' | 'disabled'
   tagFilter: string | null
+  language: 'en' | 'zh'
 }
 
 const REFRESH_INTERVAL_MS = 5000
@@ -33,52 +34,53 @@ export function mountApp(root: HTMLElement) {
         <div class="brand">
           <div class="brand-mark">CS</div>
           <div>
-            <div class="brand-title">Codex Skills Manager</div>
-            <div class="brand-subtitle">Local skill registry • Tauri desktop</div>
+            <div class="brand-title" id="brandTitle"></div>
+            <div class="brand-subtitle" id="brandSubtitle"></div>
           </div>
         </div>
         <div class="topbar-actions">
-          <div class="notice" id="restartNotice" hidden>
-            重启 Codex 生效
-          </div>
-          <button class="ghost" id="refreshBtn">Refresh</button>
+          <div class="notice" id="restartNotice" hidden></div>
+          <button class="ghost" id="refreshBtn"></button>
         </div>
       </header>
 
       <section class="toolbar">
         <div class="search">
           <span class="search-icon">⌕</span>
-          <input id="searchInput" type="search" placeholder="Search skills by name, slug, description" />
+          <input id="searchInput" type="search" />
+        </div>
+        <div class="toolbar-actions">
+          <button class="ghost" id="settingsBtn"></button>
         </div>
       </section>
       <div class="alert-bar" id="alertBar" hidden></div>
 
       <main class="content">
         <aside class="sidebar">
-          <div class="sidebar-title">Filters</div>
+          <div class="sidebar-title" id="filtersTitle"></div>
           <button class="side-item" data-filter="all" id="filterAll">
-            <span>All skills</span>
+            <span id="filterAllLabel"></span>
             <span class="side-count" id="countAll">0</span>
           </button>
           <button class="side-item" data-filter="enabled" id="filterEnabled">
-            <span>Enabled</span>
+            <span id="filterEnabledLabel"></span>
             <span class="side-count" id="countEnabled">0</span>
           </button>
           <button class="side-item" data-filter="disabled" id="filterDisabled">
-            <span>Disabled</span>
+            <span id="filterDisabledLabel"></span>
             <span class="side-count" id="countDisabled">0</span>
           </button>
-          <div class="sidebar-title">Sort</div>
+          <div class="sidebar-title" id="sortTitle"></div>
           <button class="side-item" data-sort="name" id="sortName">
-            <span>Name (A–Z)</span>
+            <span id="sortNameLabel"></span>
           </button>
           <button class="side-item" data-sort="enabled" id="sortEnabled">
-            <span>Enabled first</span>
+            <span id="sortEnabledLabel"></span>
           </button>
           <button class="side-item" data-sort="mtime" id="sortRecent">
-            <span>Recent changes</span>
+            <span id="sortRecentLabel"></span>
           </button>
-          <div class="sidebar-title">Tags</div>
+          <div class="sidebar-title" id="tagsTitle"></div>
           <div class="tag-list" id="tagList"></div>
         </aside>
         <aside class="list-panel">
@@ -88,15 +90,15 @@ export function mountApp(root: HTMLElement) {
         <section class="detail-panel">
           <div id="detailEmpty" class="detail-empty">
             <div class="empty-mark">✦</div>
-            <div class="empty-title">Select a skill</div>
-            <div class="empty-subtitle">Inspect metadata, toggle enablement, or delete safely.</div>
+            <div class="empty-title" id="emptyTitle"></div>
+            <div class="empty-subtitle" id="emptySubtitle"></div>
           </div>
           <div id="detailView" class="detail-view" hidden></div>
         </section>
       </main>
 
       <footer class="statusbar">
-        <div id="statusText">Ready</div>
+        <div id="statusText"></div>
         <div class="status-meta" id="statusMeta"></div>
       </footer>
 
@@ -105,10 +107,26 @@ export function mountApp(root: HTMLElement) {
       <div class="modal-backdrop" id="confirmBackdrop" hidden>
         <div class="modal">
           <div class="modal-title" id="confirmTitle">Delete skill?</div>
-          <div class="modal-body" id="confirmBody">This will move the folder to Trash.</div>
+          <div class="modal-body" id="confirmBody"></div>
           <div class="modal-actions">
-            <button class="ghost" id="confirmCancel">Cancel</button>
-            <button class="danger" id="confirmOk">Delete</button>
+            <button class="ghost" id="confirmCancel"></button>
+            <button class="danger" id="confirmOk"></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-backdrop" id="settingsBackdrop" hidden>
+        <div class="modal">
+          <div class="modal-title" id="settingsTitle"></div>
+          <div class="modal-body">
+            <label class="settings-label" id="languageLabel"></label>
+            <select id="languageSelect">
+              <option value="en">English</option>
+              <option value="zh">中文</option>
+            </select>
+          </div>
+          <div class="modal-actions">
+            <button class="ghost" id="settingsClose"></button>
           </div>
         </div>
       </div>
@@ -123,10 +141,12 @@ export function mountApp(root: HTMLElement) {
     selectedRealpath: null,
     fingerprint: '',
     statusFilter: 'all',
-    tagFilter: null
+    tagFilter: null,
+    language: (localStorage.getItem('csm_language') as AppState['language']) || 'en'
   }
 
   const searchInput = root.querySelector<HTMLInputElement>('#searchInput')!
+  const settingsBtn = root.querySelector<HTMLButtonElement>('#settingsBtn')!
   const skillList = root.querySelector<HTMLDivElement>('#skillList')!
   const listMeta = root.querySelector<HTMLDivElement>('#listMeta')!
   const countAll = root.querySelector<HTMLSpanElement>('#countAll')!
@@ -152,6 +172,24 @@ export function mountApp(root: HTMLElement) {
   const confirmBody = root.querySelector<HTMLDivElement>('#confirmBody')!
   const confirmCancel = root.querySelector<HTMLButtonElement>('#confirmCancel')!
   const confirmOk = root.querySelector<HTMLButtonElement>('#confirmOk')!
+  const settingsBackdrop = root.querySelector<HTMLDivElement>('#settingsBackdrop')!
+  const settingsTitle = root.querySelector<HTMLDivElement>('#settingsTitle')!
+  const languageLabel = root.querySelector<HTMLLabelElement>('#languageLabel')!
+  const languageSelect = root.querySelector<HTMLSelectElement>('#languageSelect')!
+  const settingsClose = root.querySelector<HTMLButtonElement>('#settingsClose')!
+  const brandTitle = root.querySelector<HTMLDivElement>('#brandTitle')!
+  const brandSubtitle = root.querySelector<HTMLDivElement>('#brandSubtitle')!
+  const filtersTitle = root.querySelector<HTMLDivElement>('#filtersTitle')!
+  const tagsTitle = root.querySelector<HTMLDivElement>('#tagsTitle')!
+  const sortTitle = root.querySelector<HTMLDivElement>('#sortTitle')!
+  const filterAllLabel = root.querySelector<HTMLSpanElement>('#filterAllLabel')!
+  const filterEnabledLabel = root.querySelector<HTMLSpanElement>('#filterEnabledLabel')!
+  const filterDisabledLabel = root.querySelector<HTMLSpanElement>('#filterDisabledLabel')!
+  const sortNameLabel = root.querySelector<HTMLSpanElement>('#sortNameLabel')!
+  const sortEnabledLabel = root.querySelector<HTMLSpanElement>('#sortEnabledLabel')!
+  const sortRecentLabel = root.querySelector<HTMLSpanElement>('#sortRecentLabel')!
+  const emptyTitle = root.querySelector<HTMLDivElement>('#emptyTitle')!
+  const emptySubtitle = root.querySelector<HTMLDivElement>('#emptySubtitle')!
   const isTauriEnv = isTauri()
 
   searchInput.addEventListener('input', () => {
@@ -180,6 +218,27 @@ export function mountApp(root: HTMLElement) {
 
   refreshBtn.addEventListener('click', () => {
     void refreshSkills(true)
+  })
+
+  settingsBtn.addEventListener('click', () => {
+    settingsBackdrop.hidden = false
+  })
+
+  settingsBackdrop.addEventListener('click', (event) => {
+    if (event.target === settingsBackdrop) {
+      settingsBackdrop.hidden = true
+    }
+  })
+
+  settingsClose.addEventListener('click', () => {
+    settingsBackdrop.hidden = true
+  })
+
+  languageSelect.addEventListener('change', () => {
+    state.language = languageSelect.value as AppState['language']
+    localStorage.setItem('csm_language', state.language)
+    applyLanguage()
+    render()
   })
 
   window.addEventListener('keydown', (event) => {
@@ -272,7 +331,11 @@ export function mountApp(root: HTMLElement) {
     const filtered = getFilteredSkills()
     const enabledCount = state.skills.filter((s) => s.enabled).length
 
-    listMeta.textContent = `${filtered.length} shown · ${enabledCount}/${state.skills.length} enabled`
+    listMeta.textContent = t('listMeta', {
+      shown: filtered.length,
+      enabled: enabledCount,
+      total: state.skills.length
+    })
     countAll.textContent = String(state.skills.length)
     countEnabled.textContent = String(enabledCount)
     countDisabled.textContent = String(state.skills.length - enabledCount)
@@ -352,7 +415,7 @@ export function mountApp(root: HTMLElement) {
       <button class="skill-card ${selected ? 'selected' : ''} ${!skill.enabled ? 'disabled' : ''}" data-id="${skill.id}">
         <div class="skill-head">
           <div class="skill-title">${name}</div>
-          <span class="pill ${status}">${status}</span>
+          <span class="pill ${status}">${t(status)}</span>
         </div>
         <div class="skill-desc">${desc}</div>
         <div class="skill-meta">
@@ -411,9 +474,9 @@ export function mountApp(root: HTMLElement) {
     detailView.hidden = false
 
     const status = selected.enabled ? 'enabled' : 'disabled'
-    const toggleLabel = selected.enabled ? 'Disable' : 'Enable'
+    const toggleLabel = selected.enabled ? t('disable') : t('enable')
     const toggleClass = selected.enabled ? 'danger' : 'primary'
-    const sourceLabel = selected.enabled ? '默认启用' : '来源：config.toml'
+    const sourceLabel = selected.enabled ? t('defaultEnabled') : t('fromConfig')
     detailView.innerHTML = `
       <div class="detail-header">
         <div>
@@ -425,13 +488,13 @@ export function mountApp(root: HTMLElement) {
               .join('')}
           </div>
         </div>
-        <div class="pill ${status}">${status}</div>
+        <div class="pill ${status}">${t(status)}</div>
       </div>
       <div class="detail-status ${status}">
-        ${selected.enabled ? 'Enabled' : 'Disabled'} · ${sourceLabel}
+        ${selected.enabled ? t('enabled') : t('disabled')} · ${sourceLabel}
       </div>
       <div class="detail-description">${escapeHtml(
-        normalizeDescription(selected.description || 'No description found in SKILL.md.')
+        normalizeDescription(selected.description || t('noDescriptionDetail'))
       )}</div>
       <div class="detail-actions">
         <div class="action-row">
@@ -439,37 +502,37 @@ export function mountApp(root: HTMLElement) {
         </div>
         <div class="action-divider"></div>
         <div class="action-row">
-          <button class="danger ghost-danger" id="deleteBtn">Delete</button>
+          <button class="danger ghost-danger" id="deleteBtn">${t('delete')}</button>
         </div>
       </div>
       <div class="detail-grid">
         <div class="detail-item">
           <div class="detail-label">
-            Real Path
-            <button class="icon-btn" data-copy="${escapeHtml(selected.realpath)}" aria-label="Copy real path">Copy</button>
+            ${t('realPath')}
+            <button class="icon-btn" data-copy="${escapeHtml(selected.realpath)}" aria-label="${t('copy')}">${t('copy')}</button>
           </div>
           <div class="detail-value">${escapeHtml(selected.realpath)}</div>
         </div>
         <div class="detail-item">
           <div class="detail-label">
-            Path
-            <button class="icon-btn" data-copy="${escapeHtml(selected.path)}" aria-label="Copy path">Copy</button>
+            ${t('path')}
+            <button class="icon-btn" data-copy="${escapeHtml(selected.path)}" aria-label="${t('copy')}">${t('copy')}</button>
           </div>
           <div class="detail-value">${escapeHtml(selected.path)}</div>
         </div>
         <div class="detail-item">
           <div class="detail-label">
-            Skill ID
-            <button class="icon-btn" data-copy="${escapeHtml(selected.id)}" aria-label="Copy skill id">Copy</button>
+            ${t('skillId')}
+            <button class="icon-btn" data-copy="${escapeHtml(selected.id)}" aria-label="${t('copy')}">${t('copy')}</button>
           </div>
           <div class="detail-value mono">${escapeHtml(selected.id)}</div>
         </div>
         <div class="detail-item">
-          <div class="detail-label">Last Modified</div>
+          <div class="detail-label">${t('lastModified')}</div>
           <div class="detail-value">${formatDate(selected.skill_mtime)}</div>
         </div>
       </div>
-      <div class="detail-meta-note">Paths are shown for transparency and troubleshooting.</div>
+      <div class="detail-meta-note">${t('pathsNote')}</div>
     `
 
     const toggleBtn = detailView.querySelector<HTMLButtonElement>('#toggleBtn')!
@@ -478,7 +541,7 @@ export function mountApp(root: HTMLElement) {
 
     toggleBtn.addEventListener('click', async () => {
       try {
-        setStatus(selected.enabled ? 'Disabling…' : 'Enabling…')
+        setStatus(selected.enabled ? t('disabling') : t('enabling'))
         const result = await invoke<string>('set_enabled', {
           skillRealpath: selected.realpath,
           enabled: !selected.enabled
@@ -488,29 +551,29 @@ export function mountApp(root: HTMLElement) {
         }
         state.selectedRealpath = selected.realpath
         await refreshSkills(false)
-        showToast(selected.enabled ? 'Disabled' : 'Enabled')
-        setStatus('Ready')
+        showToast(selected.enabled ? t('disabled') : t('enabled'))
+        setStatus(t('ready'))
       } catch (err) {
-        setError(`Toggle failed: ${formatError(err)}`)
+        setError(`${t('toggleFailed')}: ${formatError(err)}`)
       }
     })
 
     deleteBtn.addEventListener('click', async () => {
       const confirmed = await showConfirm(
-        `Delete ${selected.name}?`,
-        'This will move the folder to Trash.'
+        t('deleteConfirmTitle', { name: selected.name }),
+        t('deleteConfirmBody')
       )
       if (!confirmed) return
       try {
-        setStatus('Deleting…')
+        setStatus(t('deleting'))
         await invoke('delete_skill', { skillRealpath: selected.realpath })
         state.selectedId = null
         state.selectedRealpath = null
         await refreshSkills(false)
-        showToast('Deleted')
-        setStatus('Ready')
+        showToast(t('deleted'))
+        setStatus(t('ready'))
       } catch (err) {
-        setError(`Delete failed: ${formatError(err)}`)
+        setError(`${t('deleteFailed')}: ${formatError(err)}`)
       }
     })
 
@@ -520,16 +583,16 @@ export function mountApp(root: HTMLElement) {
         try {
           await navigator.clipboard.writeText(value)
           btn.dataset.state = 'copied'
-          const original = btn.textContent || 'Copy'
-          btn.textContent = 'Copied'
+          const original = btn.textContent || t('copy')
+          btn.textContent = t('copied')
           setTimeout(() => {
           btn.textContent = original
           btn.dataset.state = ''
         }, 1200)
-          showToast('Copied')
-          setStatus('Copied')
+          showToast(t('copied'))
+          setStatus(t('copied'))
         } catch (err) {
-          setError(`Copy failed: ${formatError(err)}`)
+          setError(`${t('copyFailed')}: ${formatError(err)}`)
         }
       })
     })
@@ -644,6 +707,8 @@ export function mountApp(root: HTMLElement) {
     return new Promise<boolean>((resolve) => {
       confirmTitle.textContent = title
       confirmBody.textContent = body
+      confirmCancel.textContent = t('cancel')
+      confirmOk.textContent = t('delete')
       confirmBackdrop.hidden = false
 
       const cleanup = (result: boolean) => {
@@ -677,9 +742,142 @@ export function mountApp(root: HTMLElement) {
     }, 1400)
   }
 
+  function t(key: string, vars: Record<string, string | number> = {}) {
+    const dict = translations[state.language] || translations.en
+    const template = dict[key] || key
+    return Object.entries(vars).reduce((acc, [k, v]) => acc.replace(`{${k}}`, String(v)), template)
+  }
+
+  function applyLanguage() {
+    brandTitle.textContent = t('appTitle')
+    brandSubtitle.textContent = t('appSubtitle')
+    refreshBtn.textContent = t('refresh')
+    restartNotice.textContent = t('restartNotice')
+    searchInput.placeholder = t('searchPlaceholder')
+    settingsBtn.textContent = t('settings')
+    filtersTitle.textContent = t('filters')
+    tagsTitle.textContent = t('tags')
+    sortTitle.textContent = t('sort')
+    filterAllLabel.textContent = t('allSkills')
+    filterEnabledLabel.textContent = t('enabled')
+    filterDisabledLabel.textContent = t('disabled')
+    sortNameLabel.textContent = t('sortName')
+    sortEnabledLabel.textContent = t('sortEnabled')
+    sortRecentLabel.textContent = t('sortRecent')
+    emptyTitle.textContent = t('emptyTitle')
+    emptySubtitle.textContent = t('emptySubtitle')
+    settingsTitle.textContent = t('settingsTitle')
+    languageLabel.textContent = t('language')
+    settingsClose.textContent = t('close')
+    languageSelect.value = state.language
+    if (!statusText.textContent) {
+      setStatus(t('ready'))
+    }
+  }
+
+  const translations: Record<string, Record<string, string>> = {
+    en: {
+      appTitle: 'Codex Skills Manager',
+      appSubtitle: 'Local skill registry • Tauri desktop',
+      refresh: 'Refresh',
+      restartNotice: 'Restart Codex to apply',
+      searchPlaceholder: 'Search skills by name, slug, description',
+      settings: 'Settings',
+      filters: 'Filters',
+      tags: 'Tags',
+      sort: 'Sort',
+      allSkills: 'All skills',
+      enabled: 'Enabled',
+      disabled: 'Disabled',
+      sortName: 'Name (A–Z)',
+      sortEnabled: 'Enabled first',
+      sortRecent: 'Recent changes',
+      listMeta: '{shown} shown · {enabled}/{total} enabled',
+      emptyTitle: 'Select a skill',
+      emptySubtitle: 'Inspect metadata, toggle enablement, or delete safely.',
+      enable: 'Enable',
+      disable: 'Disable',
+      copy: 'Copy',
+      defaultEnabled: 'Default enabled',
+      fromConfig: 'From config.toml',
+      noDescription: 'No description',
+      noDescriptionDetail: 'No description found in SKILL.md.',
+      realPath: 'Real Path',
+      path: 'Path',
+      skillId: 'Skill ID',
+      lastModified: 'Last Modified',
+      pathsNote: 'Paths are shown for transparency and troubleshooting.',
+      delete: 'Delete',
+      cancel: 'Cancel',
+      close: 'Close',
+      settingsTitle: 'Settings',
+      language: 'Language',
+      deleteConfirmTitle: 'Delete {name}?',
+      deleteConfirmBody: 'This will move the folder to Trash.',
+      enabling: 'Enabling…',
+      disabling: 'Disabling…',
+      deleting: 'Deleting…',
+      deleted: 'Deleted',
+      copied: 'Copied',
+      ready: 'Ready',
+      toggleFailed: 'Toggle failed',
+      deleteFailed: 'Delete failed',
+      copyFailed: 'Copy failed'
+    },
+    zh: {
+      appTitle: 'Codex 技能管理器',
+      appSubtitle: '本地技能注册表 • Tauri 桌面端',
+      refresh: '刷新',
+      restartNotice: '重启 Codex 生效',
+      searchPlaceholder: '按名称、slug、描述搜索',
+      settings: '设置',
+      filters: '过滤',
+      tags: '标签',
+      sort: '排序',
+      allSkills: '全部技能',
+      enabled: '启用',
+      disabled: '禁用',
+      sortName: '名称 (A–Z)',
+      sortEnabled: '启用优先',
+      sortRecent: '最近修改',
+      listMeta: '显示 {shown} · 启用 {enabled}/{total}',
+      emptyTitle: '选择一个技能',
+      emptySubtitle: '查看元信息、切换启用状态或安全删除。',
+      enable: '启用',
+      disable: '禁用',
+      copy: '复制',
+      defaultEnabled: '默认启用',
+      fromConfig: '来源：config.toml',
+      noDescription: '暂无描述',
+      noDescriptionDetail: 'SKILL.md 中未提供描述。',
+      realPath: '真实路径',
+      path: '路径',
+      skillId: '技能 ID',
+      lastModified: '最近修改',
+      pathsNote: '路径用于透明与排错。',
+      delete: '删除',
+      cancel: '取消',
+      close: '关闭',
+      settingsTitle: '设置',
+      language: '语言',
+      deleteConfirmTitle: '删除 {name}？',
+      deleteConfirmBody: '将把文件夹移到废纸篓。',
+      enabling: '正在启用…',
+      disabling: '正在禁用…',
+      deleting: '正在删除…',
+      deleted: '已删除',
+      copied: '已复制',
+      ready: '就绪',
+      toggleFailed: '切换失败',
+      deleteFailed: '删除失败',
+      copyFailed: '复制失败'
+    }
+  }
   void refreshSkills(true)
   void pollFingerprint()
   if (isTauriEnv) {
     setInterval(() => void pollFingerprint(), REFRESH_INTERVAL_MS)
   }
+
+  applyLanguage()
 }
