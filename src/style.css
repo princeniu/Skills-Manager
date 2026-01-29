@@ -662,6 +662,11 @@ button:focus-visible,
   color: var(--text-300);
 }
 
+.tag-more {
+  background: rgba(91, 124, 250, 0.18);
+  color: var(--text-100);
+}
+
 .tag-list {
   display: flex;
   flex-direction: column;

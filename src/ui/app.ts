@@ -435,9 +435,11 @@ export function mountApp(root: HTMLElement) {
     const selected = skill.id === state.selectedId
     const status = skill.enabled ? 'enabled' : 'disabled'
     const name = highlightText(skill.name, state.query)
-    const desc = highlightText(normalizeDescription(skill.description || 'No description'), state.query)
+    const desc = highlightText(normalizeDescription(skill.description || t('noDescription')), state.query)
     const mtime = formatShortDate(skill.skill_mtime)
-    const tags = getTags(skill).slice(0, 2)
+    const allTags = getTags(skill)
+    const tags = allTags.slice(0, 2)
+    const extraCount = Math.max(0, allTags.length - tags.length)
     return `
       <button class="skill-card ${selected ? 'selected' : ''} ${!skill.enabled ? 'disabled' : ''}" data-id="${skill.id}">
         <div class="skill-head">
@@ -448,6 +450,7 @@ export function mountApp(root: HTMLElement) {
         <div class="skill-meta">
           <div class="tag-row">
             ${tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
+            ${extraCount > 0 ? `<span class="tag tag-more">+${extraCount}</span>` : ''}
           </div>
           <span class="mtime">${mtime}</span>
         </div>
