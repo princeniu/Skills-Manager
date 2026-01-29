@@ -589,7 +589,7 @@ export function mountApp(root: HTMLElement) {
   }
 
   function normalizeDescription(value: string) {
-    return value
+    const cleaned = value
       .replace(/^#{1,6}\s+/gm, '')
       .replace(/^>\s?/gm, '')
       .replace(/^[\s-]*[-*+]\s+/gm, '')
@@ -597,6 +597,25 @@ export function mountApp(root: HTMLElement) {
       .replace(/\*([^*]+)\*/g, '$1')
       .replace(/`([^`]+)`/g, '$1')
       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1')
+
+    const dropLabels = new Set([
+      'purpose',
+      'overview',
+      'when to use',
+      'use when',
+      'description',
+      'what it does'
+    ])
+
+    const lines = cleaned
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .filter((line) => !dropLabels.has(line.toLowerCase()))
+
+    const joined = lines.join(' ')
+    return joined
+      .replace(/^(purpose|overview|when to use|use when|description|what it does)\s*[:\-–—]\s*/i, '')
       .replace(/\s+/g, ' ')
       .trim()
   }
