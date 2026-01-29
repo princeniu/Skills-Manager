@@ -70,7 +70,7 @@ body {
   border: 1px solid var(--border-600);
   overflow: hidden;
   display: grid;
-  grid-template-rows: auto auto auto 1fr auto;
+  grid-template-rows: auto auto auto 1fr;
   min-height: 0;
 }
 
