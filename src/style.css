@@ -26,6 +26,11 @@
   box-sizing: border-box;
 }
 
+:focus-visible {
+  outline: 2px solid rgba(91, 124, 250, 0.7);
+  outline-offset: 2px;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -231,6 +236,16 @@ body {
   outline: none;
   font-family: var(--sans);
   color: var(--text-100);
+}
+
+.search input:focus-visible,
+select:focus-visible,
+button:focus-visible,
+.side-item:focus-visible,
+.tag-item:focus-visible,
+.icon-btn:focus-visible {
+  outline: 2px solid rgba(91, 124, 250, 0.7);
+  outline-offset: 2px;
 }
 
 .search input::placeholder {
@@ -733,6 +748,13 @@ button.danger {
   border: 1px solid rgba(227, 92, 92, 0.5);
   color: var(--danger-500);
   width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
 }
 
 .pill {
