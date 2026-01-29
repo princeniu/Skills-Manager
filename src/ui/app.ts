@@ -126,7 +126,9 @@ export function mountApp(root: HTMLElement) {
               <div class="settings-subtitle" id="settingsSubtitle"></div>
             </div>
             <button class="ghost settings-close" id="settingsClose" aria-label="Close">
-              <span aria-hidden="true">✕</span>
+              <svg class="icon-close" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M6 6l12 12M18 6l-12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
             </button>
           </div>
           <div class="settings-body">

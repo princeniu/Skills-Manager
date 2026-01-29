@@ -241,10 +241,10 @@ body {
   font-weight: 600;
 }
 
-.settings-close span {
+.icon-close {
+  width: 14px;
+  height: 14px;
   display: block;
-  line-height: 1;
-  transform: translateY(-0.5px);
 }
 
 .settings-close:hover {
