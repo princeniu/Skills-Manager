@@ -607,13 +607,13 @@ export function mountApp(root: HTMLElement) {
       'what it does'
     ])
 
-    const lines = cleaned
+    const baseLines = cleaned
       .split(/\r?\n/)
       .map((line) => line.trim())
       .filter(Boolean)
-      .filter((line) => !dropLabels.has(line.toLowerCase()))
+    const lines = baseLines.filter((line) => !dropLabels.has(line.toLowerCase()))
 
-    const joined = lines.join(' ')
+    const joined = (lines.length > 0 ? lines : baseLines).join(' ')
     return joined
       .replace(/^(purpose|overview|when to use|use when|description|what it does)\s*[:\-–—]\s*/i, '')
       .replace(/\s+/g, ' ')
