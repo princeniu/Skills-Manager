@@ -130,10 +130,10 @@ export function mountApp(root: HTMLElement) {
                 <label class="settings-label" id="languageLabel"></label>
                 <div class="settings-hint" id="languageHint"></div>
               </div>
-              <select id="languageSelect">
-                <option value="en">English</option>
-                <option value="zh">中文</option>
-              </select>
+              <div class="segmented" id="languageSegmented">
+                <button class="segment" data-lang="en">English</button>
+                <button class="segment" data-lang="zh">中文</button>
+              </div>
             </div>
           </div>
           <div class="settings-footer">
@@ -188,9 +188,9 @@ export function mountApp(root: HTMLElement) {
   const settingsSubtitle = root.querySelector<HTMLDivElement>('#settingsSubtitle')!
   const languageLabel = root.querySelector<HTMLLabelElement>('#languageLabel')!
   const languageHint = root.querySelector<HTMLDivElement>('#languageHint')!
-  const languageSelect = root.querySelector<HTMLSelectElement>('#languageSelect')!
   const settingsClose = root.querySelector<HTMLButtonElement>('#settingsClose')!
   const settingsFooterClose = root.querySelector<HTMLButtonElement>('#settingsFooterClose')!
+  const languageSegmented = root.querySelector<HTMLDivElement>('#languageSegmented')!
   const brandTitle = root.querySelector<HTMLDivElement>('#brandTitle')!
   const brandSubtitle = root.querySelector<HTMLDivElement>('#brandSubtitle')!
   const filtersTitle = root.querySelector<HTMLDivElement>('#filtersTitle')!
@@ -252,11 +252,13 @@ export function mountApp(root: HTMLElement) {
     settingsBackdrop.hidden = true
   })
 
-  languageSelect.addEventListener('change', () => {
-    state.language = languageSelect.value as AppState['language']
-    localStorage.setItem('csm_language', state.language)
-    applyLanguage()
-    render()
+  languageSegmented.querySelectorAll<HTMLButtonElement>('.segment').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.language = (btn.dataset.lang as AppState['language']) || 'en'
+      localStorage.setItem('csm_language', state.language)
+      applyLanguage()
+      render()
+    })
   })
 
   window.addEventListener('keydown', (event) => {
@@ -788,9 +790,11 @@ export function mountApp(root: HTMLElement) {
     settingsSubtitle.textContent = t('settingsSubtitle')
     languageLabel.textContent = t('language')
     languageHint.textContent = t('languageHint')
-    settingsClose.textContent = t('close')
+    settingsClose.setAttribute('aria-label', t('close'))
     settingsFooterClose.textContent = t('done')
-    languageSelect.value = state.language
+    languageSegmented.querySelectorAll<HTMLButtonElement>('.segment').forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.lang === state.language)
+    })
     if (!statusText.textContent) {
       setStatus(t('ready'))
     }

@@ -231,6 +231,8 @@ body {
   border: 1px solid var(--border-600);
   background: #151a20;
   color: var(--text-100);
+  font-size: 16px;
+  line-height: 1;
 }
 
 .settings-body {
@@ -270,6 +272,34 @@ body {
   padding: 6px 10px;
   background: #161a20;
   font-family: var(--sans);
+  color: var(--text-100);
+}
+
+.segmented {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid var(--border-600);
+  background: #11151a;
+  padding: 2px;
+  gap: 2px;
+}
+
+.segment {
+  border: none;
+  background: transparent;
+  color: var(--text-300);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.segment.active {
+  background: rgba(91, 124, 250, 0.2);
   color: var(--text-100);
 }
 
