@@ -125,7 +125,9 @@ export function mountApp(root: HTMLElement) {
               <div class="settings-title" id="settingsTitle"></div>
               <div class="settings-subtitle" id="settingsSubtitle"></div>
             </div>
-            <button class="ghost settings-close" id="settingsClose" aria-label="Close">✕</button>
+            <button class="ghost settings-close" id="settingsClose" aria-label="Close">
+              <span aria-hidden="true">✕</span>
+            </button>
           </div>
           <div class="settings-body">
             <div class="settings-card">
