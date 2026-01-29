@@ -399,13 +399,20 @@ button:focus-visible,
   padding: var(--space-12) var(--space-12);
   background: var(--card-700);
   color: var(--text-100);
-  transition: transform 160ms ease, box-shadow 200ms ease, border-color 180ms ease;
+  transition: transform 160ms ease, box-shadow 200ms ease, border-color 180ms ease,
+    background-color 180ms ease;
   cursor: pointer;
 }
 
 .skill-card:hover {
   transform: translateY(-1px);
   box-shadow: var(--shadow-card);
+}
+
+.skill-card:active {
+  transform: translateY(0);
+  box-shadow: none;
+  background: #1a1f26;
 }
 
 .skill-card.selected {
@@ -719,6 +726,14 @@ button.ghost {
   transition: background-color 160ms ease, border-color 160ms ease, transform 120ms ease;
 }
 
+button.ghost:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+button.ghost:active {
+  transform: translateY(1px);
+}
+
 button.primary {
   padding: 8px 14px;
   border-radius: var(--radius-btn);
@@ -729,6 +744,14 @@ button.primary {
   letter-spacing: 1px;
   text-transform: uppercase;
   transition: background-color 160ms ease, transform 120ms ease;
+}
+
+button.primary:hover {
+  background: #6c8bff;
+}
+
+button.primary:active {
+  transform: translateY(1px);
 }
 
 button.danger {
@@ -743,11 +766,23 @@ button.danger {
   transition: background-color 160ms ease, transform 120ms ease;
 }
 
+button.danger:hover {
+  background: #ef6a6a;
+}
+
+button.danger:active {
+  transform: translateY(1px);
+}
+
 .ghost-danger {
   background: rgba(227, 92, 92, 0.08);
   border: 1px solid rgba(227, 92, 92, 0.5);
   color: var(--danger-500);
   width: 100%;
+}
+
+.ghost-danger:hover {
+  background: rgba(227, 92, 92, 0.14);
 }
 
 @media (prefers-reduced-motion: reduce) {
