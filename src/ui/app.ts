@@ -345,7 +345,7 @@ export function mountApp(root: HTMLElement) {
     const selected = skill.id === state.selectedId
     const status = skill.enabled ? 'enabled' : 'disabled'
     const name = highlightText(skill.name, state.query)
-    const desc = highlightText(skill.description || 'No description', state.query)
+    const desc = highlightText(normalizeDescription(skill.description || 'No description'), state.query)
     const mtime = formatShortDate(skill.skill_mtime)
     const tags = getTags(skill).slice(0, 2)
     return `
@@ -430,7 +430,9 @@ export function mountApp(root: HTMLElement) {
       <div class="detail-status ${status}">
         ${selected.enabled ? 'Enabled' : 'Disabled'} · ${sourceLabel}
       </div>
-      <div class="detail-description">${escapeHtml(selected.description || 'No description found in SKILL.md.')}</div>
+      <div class="detail-description">${escapeHtml(
+        normalizeDescription(selected.description || 'No description found in SKILL.md.')
+      )}</div>
       <div class="detail-actions">
         <div class="action-row">
           <button class="${toggleClass} primary-action" id="toggleBtn">${toggleLabel}</button>
@@ -584,6 +586,19 @@ export function mountApp(root: HTMLElement) {
     const escaped = escapeRegExp(query)
     const regex = new RegExp(escaped, 'ig')
     return safe.replace(regex, (match) => `<mark class="hl">${match}</mark>`)
+  }
+
+  function normalizeDescription(value: string) {
+    return value
+      .replace(/^#{1,6}\s+/gm, '')
+      .replace(/^>\s?/gm, '')
+      .replace(/^[\s-]*[-*+]\s+/gm, '')
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/\*([^*]+)\*/g, '$1')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1')
+      .replace(/\s+/g, ' ')
+      .trim()
   }
 
   function getTags(skill: Skill) {
