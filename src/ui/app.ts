@@ -414,7 +414,7 @@ export function mountApp(root: HTMLElement) {
         .map(
           ([tag, count]) => `
             <button class="tag-item ${state.tagFilter === tag ? 'active' : ''}" data-tag="${escapeHtml(tag)}">
-              <span class="tag-label">${escapeHtml(tag)}</span>
+              <span class="tag-label">${escapeHtml(tagLabel(tag))}</span>
               <span class="tag-count">${count}</span>
             </button>
           `
@@ -449,7 +449,7 @@ export function mountApp(root: HTMLElement) {
         <div class="skill-desc">${desc}</div>
         <div class="skill-meta">
           <div class="tag-row">
-            ${tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
+            ${tags.map((tag) => `<span class="tag">${escapeHtml(tagLabel(tag))}</span>`).join('')}
             ${extraCount > 0 ? `<span class="tag tag-more">+${extraCount}</span>` : ''}
           </div>
           <span class="mtime">${mtime}</span>
@@ -514,7 +514,7 @@ export function mountApp(root: HTMLElement) {
           <div class="detail-tags">
             ${getTags(selected)
               .slice(0, 4)
-              .map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`)
+              .map((tag) => `<span class="tag">${escapeHtml(tagLabel(tag))}</span>`)
               .join('')}
           </div>
         </div>
@@ -716,21 +716,27 @@ export function mountApp(root: HTMLElement) {
   function getTags(skill: Skill) {
     const hay = `${skill.slug} ${skill.name} ${skill.description}`.toLowerCase()
     const tags: string[] = []
-    const add = (label: string) => {
-      if (!tags.includes(label)) tags.push(label)
+    const add = (key: string) => {
+      if (!tags.includes(key)) tags.push(key)
     }
 
-    if (/(security|pentest|vuln|attack|exploit|xss|sql|idor|auth|privilege)/.test(hay)) add('Security')
-    if (/(frontend|ui|ux|design|css|react|web|tailwind)/.test(hay)) add('Frontend')
-    if (/(backend|api|server|node|database|prisma|graphql)/.test(hay)) add('Backend')
-    if (/(cloud|aws|gcp|azure|devops|docker|k8s|infra)/.test(hay)) add('Infra')
-    if (/(ml|ai|agent|llm|prompt|rag|nlp)/.test(hay)) add('AI')
-    if (/(testing|test|qa|debug)/.test(hay)) add('Testing')
-    if (/(mobile|ios|android|swift|react native)/.test(hay)) add('Mobile')
-    if (/(game|unity|unreal|3d|2d|webgl)/.test(hay)) add('Game')
-    if (/(marketing|seo|growth|copy|ads|content)/.test(hay)) add('Marketing')
-    if (tags.length === 0) tags.push('General')
+    if (/(security|pentest|vuln|attack|exploit|xss|sql|idor|auth|privilege)/.test(hay)) add('security')
+    if (/(frontend|ui|ux|design|css|react|web|tailwind)/.test(hay)) add('frontend')
+    if (/(backend|api|server|node|database|prisma|graphql)/.test(hay)) add('backend')
+    if (/(cloud|aws|gcp|azure|devops|docker|k8s|infra)/.test(hay)) add('infra')
+    if (/(ml|ai|agent|llm|prompt|rag|nlp)/.test(hay)) add('ai')
+    if (/(testing|test|qa|debug)/.test(hay)) add('testing')
+    if (/(mobile|ios|android|swift|react native)/.test(hay)) add('mobile')
+    if (/(game|unity|unreal|3d|2d|webgl)/.test(hay)) add('game')
+    if (/(marketing|seo|growth|copy|ads|content)/.test(hay)) add('marketing')
+    if (tags.length === 0) tags.push('general')
     return tags
+  }
+
+  function tagLabel(key: string) {
+    const dict = translations[state.language] || translations.en
+    const tagMap = dict.tagLabels || {}
+    return tagMap[key] || key
   }
 
   function showConfirm(title: string, body: string) {
@@ -861,7 +867,19 @@ export function mountApp(root: HTMLElement) {
       ready: 'Ready',
       toggleFailed: 'Toggle failed',
       deleteFailed: 'Delete failed',
-      copyFailed: 'Copy failed'
+      copyFailed: 'Copy failed',
+      tagLabels: {
+        security: 'Security',
+        frontend: 'Frontend',
+        backend: 'Backend',
+        infra: 'Infra',
+        ai: 'AI',
+        testing: 'Testing',
+        mobile: 'Mobile',
+        game: 'Game',
+        marketing: 'Marketing',
+        general: 'General'
+      }
     },
     zh: {
       appTitle: 'Codex 技能管理器',
@@ -912,7 +930,19 @@ export function mountApp(root: HTMLElement) {
       ready: '就绪',
       toggleFailed: '切换失败',
       deleteFailed: '删除失败',
-      copyFailed: '复制失败'
+      copyFailed: '复制失败',
+      tagLabels: {
+        security: '安全',
+        frontend: '前端',
+        backend: '后端',
+        infra: '基础设施',
+        ai: 'AI',
+        testing: '测试',
+        mobile: '移动端',
+        game: '游戏',
+        marketing: '营销',
+        general: '通用'
+      }
     }
   }
   void refreshSkills(true)
