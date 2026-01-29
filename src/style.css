@@ -232,9 +232,10 @@ body {
   background: #151a20;
   color: var(--text-100);
   font-size: 14px;
-  line-height: 1;
-  display: grid;
-  place-items: center;
+  line-height: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 0;
   text-transform: none;
   letter-spacing: 0;
@@ -242,9 +243,10 @@ body {
 }
 
 .icon-close {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   display: block;
+  margin: 0;
 }
 
 .settings-close:hover {
