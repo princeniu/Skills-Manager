@@ -163,6 +163,7 @@ body {
   display: grid;
   place-items: center;
   z-index: 50;
+  backdrop-filter: blur(8px);
 }
 
 .modal-backdrop[hidden] {
@@ -175,7 +176,7 @@ body {
   border-radius: var(--radius-panel);
   border: 1px solid var(--border-600);
   padding: var(--space-16) var(--space-20);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.6);
 }
 
 .modal-title {
@@ -191,6 +192,90 @@ body {
 }
 
 .modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.settings-modal {
+  width: min(520px, 92vw);
+  padding: 0;
+  overflow: hidden;
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-16) var(--space-20);
+  border-bottom: 1px solid var(--border-600);
+}
+
+.settings-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.settings-subtitle {
+  font-size: 11px;
+  color: var(--text-300);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.settings-close {
+  border-radius: 999px;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border-600);
+  background: #151a20;
+  color: var(--text-100);
+}
+
+.settings-body {
+  padding: var(--space-16) var(--space-20) var(--space-20);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+.settings-card {
+  border: 1px solid var(--border-600);
+  border-radius: var(--radius-btn);
+  padding: 12px 14px;
+  background: #151a20;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-12);
+  align-items: center;
+}
+
+.settings-label {
+  font-size: 12px;
+  color: var(--text-100);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.settings-hint {
+  font-size: 11px;
+  color: var(--text-300);
+  margin-top: 4px;
+}
+
+.settings-card select {
+  border-radius: var(--radius-btn);
+  border: 1px solid var(--border-600);
+  padding: 6px 10px;
+  background: #161a20;
+  font-family: var(--sans);
+  color: var(--text-100);
+}
+
+.settings-footer {
+  padding: 12px var(--space-20);
+  border-top: 1px solid var(--border-600);
   display: flex;
   justify-content: flex-end;
   gap: 10px;

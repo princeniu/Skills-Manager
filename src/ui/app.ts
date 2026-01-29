@@ -116,17 +116,28 @@ export function mountApp(root: HTMLElement) {
       </div>
 
       <div class="modal-backdrop" id="settingsBackdrop" hidden>
-        <div class="modal">
-          <div class="modal-title" id="settingsTitle"></div>
-          <div class="modal-body">
-            <label class="settings-label" id="languageLabel"></label>
-            <select id="languageSelect">
-              <option value="en">English</option>
-              <option value="zh">中文</option>
-            </select>
+        <div class="modal settings-modal">
+          <div class="settings-header">
+            <div>
+              <div class="settings-title" id="settingsTitle"></div>
+              <div class="settings-subtitle" id="settingsSubtitle"></div>
+            </div>
+            <button class="ghost settings-close" id="settingsClose">×</button>
           </div>
-          <div class="modal-actions">
-            <button class="ghost" id="settingsClose"></button>
+          <div class="settings-body">
+            <div class="settings-card">
+              <div>
+                <label class="settings-label" id="languageLabel"></label>
+                <div class="settings-hint" id="languageHint"></div>
+              </div>
+              <select id="languageSelect">
+                <option value="en">English</option>
+                <option value="zh">中文</option>
+              </select>
+            </div>
+          </div>
+          <div class="settings-footer">
+            <button class="ghost" id="settingsFooterClose"></button>
           </div>
         </div>
       </div>
@@ -174,9 +185,12 @@ export function mountApp(root: HTMLElement) {
   const confirmOk = root.querySelector<HTMLButtonElement>('#confirmOk')!
   const settingsBackdrop = root.querySelector<HTMLDivElement>('#settingsBackdrop')!
   const settingsTitle = root.querySelector<HTMLDivElement>('#settingsTitle')!
+  const settingsSubtitle = root.querySelector<HTMLDivElement>('#settingsSubtitle')!
   const languageLabel = root.querySelector<HTMLLabelElement>('#languageLabel')!
+  const languageHint = root.querySelector<HTMLDivElement>('#languageHint')!
   const languageSelect = root.querySelector<HTMLSelectElement>('#languageSelect')!
   const settingsClose = root.querySelector<HTMLButtonElement>('#settingsClose')!
+  const settingsFooterClose = root.querySelector<HTMLButtonElement>('#settingsFooterClose')!
   const brandTitle = root.querySelector<HTMLDivElement>('#brandTitle')!
   const brandSubtitle = root.querySelector<HTMLDivElement>('#brandSubtitle')!
   const filtersTitle = root.querySelector<HTMLDivElement>('#filtersTitle')!
@@ -231,6 +245,10 @@ export function mountApp(root: HTMLElement) {
   })
 
   settingsClose.addEventListener('click', () => {
+    settingsBackdrop.hidden = true
+  })
+
+  settingsFooterClose.addEventListener('click', () => {
     settingsBackdrop.hidden = true
   })
 
@@ -767,8 +785,11 @@ export function mountApp(root: HTMLElement) {
     emptyTitle.textContent = t('emptyTitle')
     emptySubtitle.textContent = t('emptySubtitle')
     settingsTitle.textContent = t('settingsTitle')
+    settingsSubtitle.textContent = t('settingsSubtitle')
     languageLabel.textContent = t('language')
+    languageHint.textContent = t('languageHint')
     settingsClose.textContent = t('close')
+    settingsFooterClose.textContent = t('done')
     languageSelect.value = state.language
     if (!statusText.textContent) {
       setStatus(t('ready'))
@@ -811,7 +832,10 @@ export function mountApp(root: HTMLElement) {
       cancel: 'Cancel',
       close: 'Close',
       settingsTitle: 'Settings',
+      settingsSubtitle: 'Personalization',
       language: 'Language',
+      languageHint: 'Choose your preferred UI language.',
+      done: 'Done',
       deleteConfirmTitle: 'Delete {name}?',
       deleteConfirmBody: 'This will move the folder to Trash.',
       enabling: 'Enabling…',
@@ -859,7 +883,10 @@ export function mountApp(root: HTMLElement) {
       cancel: '取消',
       close: '关闭',
       settingsTitle: '设置',
+      settingsSubtitle: '个性化',
       language: '语言',
+      languageHint: '选择你偏好的界面语言。',
+      done: '完成',
       deleteConfirmTitle: '删除 {name}？',
       deleteConfirmBody: '将把文件夹移到废纸篓。',
       enabling: '正在启用…',
