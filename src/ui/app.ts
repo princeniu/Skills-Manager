@@ -50,7 +50,10 @@ export function mountApp(root: HTMLElement) {
           <input id="searchInput" type="search" />
         </div>
         <div class="toolbar-actions">
-          <button class="ghost" id="settingsBtn"></button>
+          <button class="ghost settings-btn" id="settingsBtn">
+            <span class="settings-icon" aria-hidden="true">⚙︎</span>
+            <span id="settingsBtnLabel"></span>
+          </button>
         </div>
       </section>
       <div class="alert-bar" id="alertBar" hidden></div>
@@ -122,7 +125,7 @@ export function mountApp(root: HTMLElement) {
               <div class="settings-title" id="settingsTitle"></div>
               <div class="settings-subtitle" id="settingsSubtitle"></div>
             </div>
-            <button class="ghost settings-close" id="settingsClose">×</button>
+            <button class="ghost settings-close" id="settingsClose" aria-label="Close">✕</button>
           </div>
           <div class="settings-body">
             <div class="settings-card">
@@ -774,7 +777,8 @@ export function mountApp(root: HTMLElement) {
     refreshBtn.textContent = t('refresh')
     restartNotice.textContent = t('restartNotice')
     searchInput.placeholder = t('searchPlaceholder')
-    settingsBtn.textContent = t('settings')
+    settingsBtnLabel.textContent = t('settings')
+    settingsBtnLabel.textContent = t('settings')
     filtersTitle.textContent = t('filters')
     tagsTitle.textContent = t('tags')
     sortTitle.textContent = t('sort')
@@ -912,3 +916,4 @@ export function mountApp(root: HTMLElement) {
 
   applyLanguage()
 }
+  const settingsBtnLabel = root.querySelector<HTMLSpanElement>('#settingsBtnLabel')!

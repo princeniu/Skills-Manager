@@ -226,13 +226,35 @@ body {
 
 .settings-close {
   border-radius: 999px;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border: 1px solid var(--border-600);
   background: #151a20;
   color: var(--text-100);
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+.settings-close:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.settings-close:active {
+  transform: translateY(1px);
+}
+
+.settings-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.settings-icon {
+  font-size: 13px;
+  opacity: 0.8;
 }
 
 .settings-body {
