@@ -414,7 +414,6 @@ export function mountApp(root: HTMLElement) {
     const toggleLabel = selected.enabled ? 'Disable' : 'Enable'
     const toggleClass = selected.enabled ? 'danger' : 'primary'
     const sourceLabel = selected.enabled ? '默认启用' : '来源：config.toml'
-    const restartLabel = restartNotice.hidden ? '' : ' · 重启 Codex 生效'
     detailView.innerHTML = `
       <div class="detail-header">
         <div>
@@ -429,7 +428,7 @@ export function mountApp(root: HTMLElement) {
         <div class="pill ${status}">${status}</div>
       </div>
       <div class="detail-status ${status}">
-        ${selected.enabled ? 'Enabled' : 'Disabled'} · ${sourceLabel}${restartLabel}
+        ${selected.enabled ? 'Enabled' : 'Disabled'} · ${sourceLabel}
       </div>
       <div class="detail-description">${escapeHtml(selected.description || 'No description found in SKILL.md.')}</div>
       <div class="detail-actions">
