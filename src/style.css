@@ -724,6 +724,26 @@ button:focus-visible,
   background: linear-gradient(180deg, rgba(22, 26, 32, 0) 0%, rgba(22, 26, 32, 1) 100%);
 }
 
+.sidebar::after {
+  content: '';
+  position: sticky;
+  bottom: 0;
+  height: 18px;
+  width: 100%;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(22, 26, 32, 0) 0%, rgba(22, 26, 32, 1) 100%);
+}
+
+.sidebar::after {
+  content: '';
+  position: sticky;
+  bottom: 0;
+  height: 18px;
+  width: 100%;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(22, 26, 32, 0) 0%, rgba(22, 26, 32, 1) 100%);
+}
+
 .detail-empty {
   text-align: center;
   color: var(--text-300);
