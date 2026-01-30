@@ -9,6 +9,7 @@ use std::time::{Duration, Instant};
 struct SkillCache {
   last_scan: Option<Instant>,
   skills: Vec<skills::types::Skill>,
+  root: Option<std::path::PathBuf>,
 }
 
 static SKILL_CACHE: Lazy<Mutex<SkillCache>> = Lazy::new(|| Mutex::new(SkillCache::default()));
@@ -37,16 +38,41 @@ pub fn run() {
     .expect("error while running tauri application");
 }
 
+fn resolve_root(root_path: Option<String>) -> Result<std::path::PathBuf, String> {
+    if let Some(path) = root_path {
+        if path.trim().is_empty() {
+            return Err("Empty root path".to_string());
+        }
+        let expanded = if let Some(stripped) = path.strip_prefix("~/") {
+            if let Ok(home) = std::env::var("HOME") {
+                format!("{}/{}", home, stripped)
+            } else {
+                path
+            }
+        } else {
+            path
+        };
+        let real = std::fs::canonicalize(&expanded).map_err(|e| e.to_string())?;
+        if !real.is_dir() {
+            return Err("Root path is not a directory".to_string());
+        }
+        return Ok(real);
+    }
+    skills::skills_root().map_err(|e| e.to_string())
+}
+
 #[tauri::command]
-fn list_skills() -> Result<Vec<skills::types::Skill>, String> {
-    let root = skills::skills_root().map_err(|e| e.to_string())?;
+fn list_skills(root_path: Option<String>) -> Result<Vec<skills::types::Skill>, String> {
+    let root = resolve_root(root_path)?;
     let mut items: Vec<skills::types::Skill> = Vec::new();
     let now = Instant::now();
     let mut used_cache = false;
 
     if let Ok(cache) = SKILL_CACHE.lock() {
       if let Some(last) = cache.last_scan {
-        if now.duration_since(last) < Duration::from_secs(2) {
+        if now.duration_since(last) < Duration::from_secs(2)
+            && cache.root.as_ref().map(|r| r == &root).unwrap_or(false)
+        {
           items = cache.skills.clone();
           used_cache = true;
         }
@@ -59,6 +85,7 @@ fn list_skills() -> Result<Vec<skills::types::Skill>, String> {
       if let Ok(mut cache) = SKILL_CACHE.lock() {
         cache.last_scan = Some(now);
         cache.skills = items.clone();
+        cache.root = Some(root.clone());
       }
     }
     let disabled = disabled_result.join().map_err(|_| "Failed to read config".to_string())?
@@ -87,12 +114,13 @@ fn invalidate_cache() {
     if let Ok(mut cache) = SKILL_CACHE.lock() {
         cache.last_scan = None;
         cache.skills.clear();
+        cache.root = None;
     }
 }
 
 #[tauri::command]
-fn delete_skill(skill_realpath: String) -> Result<(), String> {
-    let root = skills::skills_root().map_err(|e| e.to_string())?;
+fn delete_skill(root_path: Option<String>, skill_realpath: String) -> Result<(), String> {
+    let root = resolve_root(root_path)?;
     let real = std::fs::canonicalize(&skill_realpath).map_err(|e| e.to_string())?;
     if !real.starts_with(&root) {
         return Err("Refusing to delete path outside skills root".to_string());

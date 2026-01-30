@@ -23,6 +23,7 @@ type AppState = {
   statusFilter: 'all' | 'enabled' | 'disabled'
   tagFilter: string | null
   language: 'en' | 'zh'
+  rootPath: string
 }
 
 const REFRESH_INTERVAL_MS = 5000
@@ -137,6 +138,14 @@ export function mountApp(root: HTMLElement) {
                 <button class="segment" data-lang="zh">中文</button>
               </div>
             </div>
+            <div class="settings-card">
+              <div>
+                <label class="settings-label" id="rootPathLabel"></label>
+                <div class="settings-hint" id="rootPathHint"></div>
+              </div>
+              <input id="rootPathInput" type="text" />
+            </div>
+            <div class="settings-error" id="rootPathError" hidden></div>
           </div>
           <div class="settings-footer">
             <button class="ghost" id="settingsFooterClose"></button>
@@ -155,7 +164,8 @@ export function mountApp(root: HTMLElement) {
     fingerprint: '',
     statusFilter: 'all',
     tagFilter: null,
-    language: (localStorage.getItem('csm_language') as AppState['language']) || 'en'
+    language: (localStorage.getItem('csm_language') as AppState['language']) || 'en',
+    rootPath: localStorage.getItem('csm_root_path') || ''
   }
 
   const searchInput = root.querySelector<HTMLInputElement>('#searchInput')!
@@ -193,6 +203,10 @@ export function mountApp(root: HTMLElement) {
   const settingsClose = root.querySelector<HTMLButtonElement>('#settingsClose')!
   const settingsFooterClose = root.querySelector<HTMLButtonElement>('#settingsFooterClose')!
   const languageSegmented = root.querySelector<HTMLDivElement>('#languageSegmented')!
+  const rootPathLabel = root.querySelector<HTMLLabelElement>('#rootPathLabel')!
+  const rootPathHint = root.querySelector<HTMLDivElement>('#rootPathHint')!
+  const rootPathInput = root.querySelector<HTMLInputElement>('#rootPathInput')!
+  const rootPathError = root.querySelector<HTMLDivElement>('#rootPathError')!
   const brandTitle = root.querySelector<HTMLDivElement>('#brandTitle')!
   const brandSubtitle = root.querySelector<HTMLDivElement>('#brandSubtitle')!
   const filtersTitle = root.querySelector<HTMLDivElement>('#filtersTitle')!
@@ -237,21 +251,25 @@ export function mountApp(root: HTMLElement) {
   })
 
   settingsBtn.addEventListener('click', () => {
-    settingsBackdrop.hidden = false
+    openSettings(false)
   })
 
   settingsBackdrop.addEventListener('click', (event) => {
     if (event.target === settingsBackdrop) {
-      settingsBackdrop.hidden = true
+      void closeSettings()
     }
   })
 
   settingsClose.addEventListener('click', () => {
-    settingsBackdrop.hidden = true
+    void closeSettings()
   })
 
   settingsFooterClose.addEventListener('click', () => {
-    settingsBackdrop.hidden = true
+    void closeSettings()
+  })
+
+  rootPathInput.addEventListener('input', () => {
+    rootPathError.hidden = true
   })
 
   languageSegmented.querySelectorAll<HTMLButtonElement>('.segment').forEach((btn) => {
@@ -286,8 +304,12 @@ export function mountApp(root: HTMLElement) {
         setError('This view is for Tauri only. Please open via `npm run tauri dev`.')
         return
       }
+      if (!state.rootPath) {
+        setError(t('rootRequired'))
+        return
+      }
       if (showStatus) setStatus('Refreshing…')
-      const items = await invoke<Skill[]>('list_skills')
+      const items = await invoke<Skill[]>('list_skills', { rootPath: state.rootPath })
       state.skills = items
       if (state.selectedRealpath) {
         const match = items.find((s) => s.realpath === state.selectedRealpath)
@@ -580,7 +602,7 @@ export function mountApp(root: HTMLElement) {
       if (!confirmed) return
       try {
         setStatus(t('deleting'))
-        await invoke('delete_skill', { skillRealpath: selected.realpath })
+        await invoke('delete_skill', { skillRealpath: selected.realpath, rootPath: state.rootPath })
         state.selectedId = null
         state.selectedRealpath = null
         await refreshSkills(false)
@@ -801,14 +823,54 @@ export function mountApp(root: HTMLElement) {
     settingsSubtitle.textContent = t('settingsSubtitle')
     languageLabel.textContent = t('language')
     languageHint.textContent = t('languageHint')
+    rootPathLabel.textContent = t('rootPath')
+    rootPathHint.textContent = t('rootPathHint')
     settingsClose.setAttribute('aria-label', t('close'))
     settingsFooterClose.textContent = t('done')
     languageSegmented.querySelectorAll<HTMLButtonElement>('.segment').forEach((btn) => {
       btn.classList.toggle('active', btn.dataset.lang === state.language)
     })
+    rootPathInput.placeholder = t('rootPathPlaceholder')
+    rootPathInput.value = state.rootPath
+    updateSettingsLock()
     if (!statusText.textContent) {
       setStatus(t('ready'))
     }
+  }
+
+  function updateSettingsLock() {
+    const locked = !state.rootPath
+    settingsClose.disabled = locked
+    settingsFooterClose.disabled = locked
+    settingsBackdrop.dataset.locked = locked ? 'true' : 'false'
+  }
+
+  function openSettings(force: boolean) {
+    settingsBackdrop.hidden = false
+    rootPathInput.value = state.rootPath
+    rootPathError.hidden = true
+    if (force) {
+      settingsBackdrop.dataset.locked = 'true'
+      settingsClose.disabled = true
+      settingsFooterClose.disabled = true
+    } else {
+      updateSettingsLock()
+    }
+  }
+
+  async function closeSettings() {
+    const candidate = rootPathInput.value.trim()
+    if (!candidate) {
+      rootPathError.textContent = t('rootPathRequired')
+      rootPathError.hidden = false
+      return
+    }
+    state.rootPath = candidate
+    localStorage.setItem('csm_root_path', state.rootPath)
+    rootPathError.hidden = true
+    settingsBackdrop.hidden = true
+    updateSettingsLock()
+    await refreshSkills(true)
   }
 
   const translations: Record<string, Record<string, string>> = {
@@ -850,6 +912,11 @@ export function mountApp(root: HTMLElement) {
       settingsSubtitle: 'Personalization',
       language: 'Language',
       languageHint: 'Choose your preferred UI language.',
+      rootPath: 'Skills root path',
+      rootPathHint: 'Set the folder that contains your SKILL.md directories.',
+      rootPathPlaceholder: '/path/to/skills',
+      rootPathRequired: 'Please set a valid skills root path.',
+      rootRequired: 'Skills root path is required. Open Settings to configure.',
       done: 'Done',
       deleteConfirmTitle: 'Delete {name}?',
       deleteConfirmBody: 'This will move the folder to Trash.',
@@ -916,6 +983,11 @@ export function mountApp(root: HTMLElement) {
       settingsSubtitle: '个性化',
       language: '语言',
       languageHint: '选择你偏好的界面语言。',
+      rootPath: '技能根目录',
+      rootPathHint: '设置包含 SKILL.md 的目录。',
+      rootPathPlaceholder: '/path/to/skills',
+      rootPathRequired: '请设置有效的技能根目录。',
+      rootRequired: '需要先设置技能根目录，请在设置中配置。',
       done: '完成',
       deleteConfirmTitle: '删除 {name}？',
       deleteConfirmBody: '将把文件夹移到废纸篓。',
@@ -945,11 +1017,14 @@ export function mountApp(root: HTMLElement) {
       }
     }
   }
-  void refreshSkills(true)
+  applyLanguage()
+  if (!state.rootPath) {
+    openSettings(true)
+  } else {
+    void refreshSkills(true)
+  }
   void pollFingerprint()
   if (isTauriEnv) {
     setInterval(() => void pollFingerprint(), REFRESH_INTERVAL_MS)
   }
-
-  applyLanguage()
 }
