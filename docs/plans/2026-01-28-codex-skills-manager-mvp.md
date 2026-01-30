@@ -1,8 +1,8 @@
-# Codex Skills Manager MVP Implementation Plan
+# Skills Manager MVP Implementation Plan
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Build a local macOS Tauri app that lists Codex skills, shows metadata, supports search/sort, and enables/ disables/ deletes skills safely.
+**Goal:** Build a local macOS Tauri app that lists skills, shows metadata, supports search/sort, and enables/ disables/ deletes skills safely.
 
 **Architecture:** Tauri app with Rust backend commands handling file system access (scan skills, read/write config, Trash delete) and a lightweight web UI for display and interaction. Skill state is derived from `~/.codex/skills` and `~/.codex/config.toml` with minimal-edit config updates.
 
@@ -23,7 +23,7 @@ Expected: Vite project created under `/Users/prince/Desktop/Codex-Skills-Manager
 
 **Step 2: Initialize Tauri**
 Run: `cd /Users/prince/Desktop/Codex-Skills-Manager && npm install`
-Run: `cd /Users/prince/Desktop/Codex-Skills-Manager && npx tauri init --app-name "Codex Skills Manager" --window-title "Codex Skills Manager"`
+Run: `cd /Users/prince/Desktop/Codex-Skills-Manager && npx tauri init --app-name "Skills Manager" --window-title "Skills Manager"`
 Expected: `src-tauri/` directory created
 
 **Step 3: Commit**
@@ -261,7 +261,7 @@ git commit -m "feat: backend commands"
 **Step 2: Wire Tauri commands**
 - Invoke `list_skills` on load
 - Invoke `set_enabled` and `delete_skill` with confirm dialogs
-- Show “重启 Codex 生效” notice
+- Show “重启应用生效” notice
 
 **Step 3: Add refresh logic**
 - Poll fingerprint every N seconds (e.g., 5s)
@@ -317,7 +317,7 @@ Include:
 - Scan rule (only directories with SKILL.md)
 - Enabled default true (disabled only if config has enabled=false)
 - Config minimal-edit strategy (local block replacement)
-- “重启 Codex 生效” notice
+- “重启应用生效” notice
 - Delete = system Trash + config cleanup
 
 **Step 2: Commit**
