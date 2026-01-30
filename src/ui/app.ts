@@ -813,10 +813,10 @@ export function mountApp(root: HTMLElement) {
 
   const translations: Record<string, Record<string, string>> = {
     en: {
-      appTitle: 'Codex Skills Manager',
+      appTitle: 'Skills Manager',
       appSubtitle: 'Local skill registry • Tauri desktop',
       refresh: 'Refresh',
-      restartNotice: 'Restart Codex to apply',
+      restartNotice: 'Restart app to apply',
       searchPlaceholder: 'Search skills by name or description',
       settings: 'Settings',
       filters: 'Filters',
@@ -879,10 +879,10 @@ export function mountApp(root: HTMLElement) {
       }
     },
     zh: {
-      appTitle: 'Codex 技能管理器',
+      appTitle: '技能管理器',
       appSubtitle: '本地技能注册表 • Tauri 桌面端',
       refresh: '刷新',
-      restartNotice: '重启 Codex 生效',
+      restartNotice: '重启应用生效',
       searchPlaceholder: '按名称或描述搜索',
       settings: '设置',
       filters: '过滤',
