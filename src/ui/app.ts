@@ -252,7 +252,7 @@ export function mountApp(root: HTMLElement) {
   const rootPathMeta = root.querySelector<HTMLDivElement>('#rootPathMeta')!
   const rootPathDetect = root.querySelector<HTMLButtonElement>('#rootPathDetect')!
   const rootPathQuick = root.querySelector<HTMLDivElement>('#rootPathQuick')!
-  const rootPathCandidates = root.querySelector<HTMLDivElement>('#rootPathCandidates')!
+  const rootPathCandidatesEl = root.querySelector<HTMLDivElement>('#rootPathCandidates')!
   const rootPathCandidatesTitle = root.querySelector<HTMLDivElement>('#rootPathCandidatesTitle')!
   const rootPathCandidatesList = root.querySelector<HTMLDivElement>('#rootPathCandidatesList')!
   const rootPathEmpty = root.querySelector<HTMLDivElement>('#rootPathEmpty')!
@@ -389,10 +389,10 @@ export function mountApp(root: HTMLElement) {
   function renderCandidates() {
     rootPathCandidatesList.innerHTML = ''
     if (!rootPathCandidates.length) {
-      rootPathCandidates.hidden = true
+      rootPathCandidatesEl.hidden = true
       return
     }
-    rootPathCandidates.hidden = false
+    rootPathCandidatesEl.hidden = false
     rootPathCandidatesTitle.textContent = t('rootPathCandidatesTitle')
     rootPathCandidates.forEach((candidate) => {
       const btn = document.createElement('button')
@@ -427,7 +427,7 @@ export function mountApp(root: HTMLElement) {
     rootPathCandidates = []
     rootPathCandidatesTitle.textContent = ''
     rootPathCandidatesList.innerHTML = ''
-    rootPathCandidates.hidden = true
+    rootPathCandidatesEl.hidden = true
     setEmptyState(false)
     for (const root of COMMON_ROOTS) {
       const stats = await getStatsForPath(root.path)
