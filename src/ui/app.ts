@@ -168,8 +168,8 @@ export function mountApp(root: HTMLElement) {
                   <input id="rootPathInput" type="text" readonly />
                   <button class="ghost settings-browse" id="rootPathBrowse"></button>
                 </div>
-                <div class="settings-meta" id="rootPathMeta" hidden></div>
-                <div class="settings-actions">
+                <div class="settings-row">
+                  <div class="settings-meta" id="rootPathMeta" hidden></div>
                   <button class="ghost settings-detect" id="rootPathDetect"></button>
                 </div>
                 <div class="settings-quick" id="rootPathQuick"></div>
@@ -390,9 +390,11 @@ export function mountApp(root: HTMLElement) {
     rootPathCandidatesList.innerHTML = ''
     if (!rootPathCandidates.length) {
       rootPathCandidatesEl.hidden = true
+      setEmptyState(true)
       return
     }
     rootPathCandidatesEl.hidden = false
+    setEmptyState(false)
     rootPathCandidatesTitle.textContent = t('rootPathCandidatesTitle')
     rootPathCandidates.forEach((candidate) => {
       const btn = document.createElement('button')
