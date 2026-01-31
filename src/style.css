@@ -395,11 +395,9 @@ body {
   cursor: pointer;
 }
 
-.settings-quick {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-8);
-  padding-top: 2px;
+.settings-detect--full {
+  width: 100%;
+  justify-content: center;
 }
 
 .settings-quick-btn {

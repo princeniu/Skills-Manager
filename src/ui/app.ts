@@ -170,9 +170,8 @@ export function mountApp(root: HTMLElement) {
                 </div>
                 <div class="settings-row">
                   <div class="settings-meta" id="rootPathMeta" hidden></div>
-                  <button class="ghost settings-detect" id="rootPathDetect"></button>
                 </div>
-                <div class="settings-quick" id="rootPathQuick"></div>
+                <button class="ghost settings-detect settings-detect--full" id="rootPathDetect"></button>
                 <div class="settings-candidates" id="rootPathCandidates" hidden>
                   <div class="settings-candidates-title" id="rootPathCandidatesTitle"></div>
                   <div class="settings-candidates-list" id="rootPathCandidatesList"></div>
@@ -251,7 +250,6 @@ export function mountApp(root: HTMLElement) {
   const rootPathBrowse = root.querySelector<HTMLButtonElement>('#rootPathBrowse')!
   const rootPathMeta = root.querySelector<HTMLDivElement>('#rootPathMeta')!
   const rootPathDetect = root.querySelector<HTMLButtonElement>('#rootPathDetect')!
-  const rootPathQuick = root.querySelector<HTMLDivElement>('#rootPathQuick')!
   const rootPathCandidatesEl = root.querySelector<HTMLDivElement>('#rootPathCandidates')!
   const rootPathCandidatesTitle = root.querySelector<HTMLDivElement>('#rootPathCandidatesTitle')!
   const rootPathCandidatesList = root.querySelector<HTMLDivElement>('#rootPathCandidatesList')!
@@ -342,19 +340,19 @@ export function mountApp(root: HTMLElement) {
     })
   })
 
-  function formatStatsLine(stats: RootPathStats | null, path: string) {
+  function formatStatsLine(stats: RootPathStats | null) {
     if (!stats) return ''
     const updated = stats.lastModified ? formatDate(stats.lastModified) : '—'
-    return t('rootPathDetected', { count: stats.count, path, updated })
+    return t('rootPathDetected', { count: stats.count, updated })
   }
 
-  function updateRootPathMeta(path: string, stats: RootPathStats | null) {
-    if (!path || !stats) {
+  function updateRootPathMeta(stats: RootPathStats | null) {
+    if (!stats) {
       rootPathMeta.hidden = true
       rootPathMeta.textContent = ''
       return
     }
-    rootPathMeta.textContent = formatStatsLine(stats, path)
+    rootPathMeta.textContent = formatStatsLine(stats)
     rootPathMeta.hidden = false
   }
 
@@ -372,9 +370,9 @@ export function mountApp(root: HTMLElement) {
 
   function renderQuickButtons(container: HTMLElement, includeAll = true) {
     container.innerHTML = ''
-    const roots = includeAll ? COMMON_ROOTS : COMMON_ROOTS.filter((item) =>
-      ['rootPathClaude', 'rootPathCursor', 'rootPathCodex'].includes(item.labelKey)
-    )
+    const roots = includeAll
+      ? COMMON_ROOTS
+      : COMMON_ROOTS.filter((item) => ['rootPathClaude', 'rootPathCursor', 'rootPathCodex'].includes(item.labelKey))
     roots.forEach((item) => {
       const btn = document.createElement('button')
       btn.type = 'button'
@@ -421,7 +419,7 @@ export function mountApp(root: HTMLElement) {
     if (show) {
       rootPathEmptyTitle.textContent = t('rootPathEmptyTitle')
       rootPathEmptyHint.textContent = t('rootPathEmptyHint')
-      renderQuickButtons(rootPathEmptyActions, false)
+      renderQuickButtons(rootPathEmptyActions, true)
     }
   }
 
@@ -459,7 +457,7 @@ export function mountApp(root: HTMLElement) {
       return
     }
     rootPathStats = stats
-    updateRootPathMeta(path, stats)
+    updateRootPathMeta(stats)
     updateSettingsLock()
     if (source === 'detect') {
       showToast(t('rootPathDetectedToast', { count: stats.count, path }))
@@ -522,7 +520,7 @@ export function mountApp(root: HTMLElement) {
       state.skills = items
       const lastModified = items.reduce((max, skill) => Math.max(max, skill.skill_mtime || 0), 0)
       rootPathStats = items.length ? { count: items.length, lastModified: lastModified || null } : null
-      updateRootPathMeta(state.rootPath, rootPathStats)
+      updateRootPathMeta(rootPathStats)
       if (state.selectedRealpath) {
         const match = items.find((s) => s.realpath === state.selectedRealpath)
         state.selectedId = match ? match.id : null
@@ -1047,12 +1045,11 @@ export function mountApp(root: HTMLElement) {
     })
     rootPathInput.placeholder = t('rootPathPlaceholder')
     rootPathInput.value = state.rootPath
-    renderQuickButtons(rootPathQuick)
     renderCandidates()
     if (!rootPathEmpty.hidden) {
       setEmptyState(true)
     }
-    updateRootPathMeta(state.rootPath, rootPathStats)
+    updateRootPathMeta(rootPathStats)
     updateSettingsLock()
     if (!statusText.textContent) {
       setStatus(t('ready'))
@@ -1070,8 +1067,7 @@ export function mountApp(root: HTMLElement) {
     settingsBackdrop.hidden = false
     rootPathInput.value = state.rootPath
     rootPathError.hidden = true
-    renderQuickButtons(rootPathQuick)
-    updateRootPathMeta(state.rootPath, rootPathStats)
+    updateRootPathMeta(rootPathStats)
     if (!state.rootPath) {
       void detectRootCandidates()
     }
@@ -1154,7 +1150,7 @@ export function mountApp(root: HTMLElement) {
       rootPathBrowse: 'Browse',
       rootPathDetect: 'Auto Detect',
       rootPathChecking: 'Checking…',
-      rootPathDetected: 'Selected {path} · {count} skills · Last updated {updated}',
+      rootPathDetected: '{count} skills · Last updated {updated}',
       rootPathDetectedToast: 'Detected {count} skills at {path}',
       rootPathNoSkills: 'No skills found in that folder.',
       rootPathDetectNone: 'No known skills folders detected.',
@@ -1181,11 +1177,11 @@ export function mountApp(root: HTMLElement) {
       open: 'Open',
       opening: 'Opening…',
       openFailed: 'Open failed',
-      rootPathClaude: 'Claude Code',
-      rootPathGemini: 'Gemini CLI',
-      rootPathAntigravity: 'Antigravity IDE',
-      rootPathCursor: 'Cursor',
-      rootPathCodex: 'Codex',
+      rootPathClaude: 'Claude Skills',
+      rootPathGemini: 'Gemini Skills',
+      rootPathAntigravity: 'Antigravity Skills',
+      rootPathCursor: 'Cursor Skills',
+      rootPathCodex: 'Codex Skills',
       tagLabels: {
         security: 'Security',
         frontend: 'Frontend',
@@ -1243,7 +1239,7 @@ export function mountApp(root: HTMLElement) {
       rootPathBrowse: '浏览',
       rootPathDetect: '自动检测',
       rootPathChecking: '正在检测…',
-      rootPathDetected: '已选择 {path} · {count} 个 skills · 最近更新 {updated}',
+      rootPathDetected: '{count} 个 skills · 最近更新 {updated}',
       rootPathDetectedToast: '已检测到 {count} 个 skills：{path}',
       rootPathNoSkills: '该文件夹未发现 skills。',
       rootPathDetectNone: '未检测到常见 skills 路径。',
@@ -1270,11 +1266,11 @@ export function mountApp(root: HTMLElement) {
       open: '打开',
       opening: '正在打开…',
       openFailed: '打开失败',
-      rootPathClaude: 'Claude Code',
-      rootPathGemini: 'Gemini CLI',
-      rootPathAntigravity: 'Antigravity IDE',
-      rootPathCursor: 'Cursor',
-      rootPathCodex: 'Codex',
+      rootPathClaude: 'Claude Skills',
+      rootPathGemini: 'Gemini Skills',
+      rootPathAntigravity: 'Antigravity Skills',
+      rootPathCursor: 'Cursor Skills',
+      rootPathCodex: 'Codex Skills',
       tagLabels: {
         security: '安全',
         frontend: '前端',
