@@ -1,8 +1,8 @@
-# Skills Manager (MVP)
+# Skills Manager
 
 A local macOS Tauri app to inspect and manage skills across common agent toolchains.
 
-## MVP Behavior
+## Behavior
 
 - **Scan rule**: Only directories containing `SKILL.md` are treated as skills.
 - **Enablement**: Skills are enabled by default. A skill is disabled only if `~/.codex/config.toml` contains a `[[skills.config]]` entry with `enabled = false` for that path.

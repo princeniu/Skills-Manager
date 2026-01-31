@@ -61,7 +61,9 @@ export function mountApp(root: HTMLElement) {
     <div class="app-shell">
       <header class="topbar">
         <div class="brand">
-          <div class="brand-mark">CS</div>
+          <div class="brand-mark">
+            <img src="/brand/icon.png" alt="Skills Manager" />
+          </div>
           <div>
             <div class="brand-title" id="brandTitle"></div>
             <div class="brand-subtitle" id="brandSubtitle"></div>
