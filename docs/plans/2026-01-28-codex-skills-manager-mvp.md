@@ -1,4 +1,4 @@
-# Skills Manager MVP Implementation Plan
+# Skills Manager 1.0 Implementation Plan
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
@@ -307,7 +307,7 @@ git commit -m "feat: safety checks and error reporting"
 
 ---
 
-### Task 9: Document MVP behavior
+### Task 9: Document behavior
 
 **Files:**
 - Create: `/Users/prince/Desktop/Codex-Skills-Manager/README.md`
@@ -324,7 +324,7 @@ Include:
 ```bash
 git add README.md
 
-git commit -m "docs: document MVP rules"
+git commit -m "docs: document behavior rules"
 ```
 
 ---
