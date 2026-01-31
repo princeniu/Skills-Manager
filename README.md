@@ -1,16 +1,18 @@
 # Skills Manager
 
-A local macOS Tauri app to inspect and manage skills across common agent toolchains.
+A local macOS app to scan, inspect, and manage agent skill registries across toolchains.
 
-## Behavior
+[中文 README](./README_ZH.md)
 
-- **Scan rule**: Only directories containing `SKILL.md` are treated as skills.
-- **Enablement**: Skills are enabled by default. A skill is disabled only if `~/.codex/config.toml` contains a `[[skills.config]]` entry with `enabled = false` for that path.
-- **Config edits**: Minimal-edit strategy. Only the matching `[[skills.config]]` entry is added/updated/removed. Other sections and entries are untouched.
-- **Restart required**: Changes require restarting the app to apply. The UI shows a notice after toggles.
-- **Delete**: Deletes move the skill folder to system Trash and clean any matching config entry.
+## Highlights
 
-## Quickstart
+- **Local-first**: Scans only on your machine. No network required.
+- **Safe enable/disable**: Default enabled; disables via config entries only.
+- **Minimal config edits**: Updates only the exact `[[skills.config]]` block.
+- **Safe delete**: Moves skill folders to system Trash and cleans config entries.
+- **Common paths**: Auto-detects well-known skill locations.
+
+## Quick Start
 
 ```bash
 npm install
@@ -20,22 +22,37 @@ npm run tauri dev
 ## First Launch
 
 1. Open **Settings**.
-2. Click **Browse** to pick your skills folder, or use **Auto Detect**.
-3. The app shows how many skills were found and the latest update time.
+2. Click **Browse** to select your skills folder or use **Auto Detect**.
+3. The app shows how many skills were found and the last update time.
 4. Click **Done** to load the list.
 
-Auto detect checks common locations:
+Auto-detect checks common locations:
 - `~/.claude/skills/`
 - `~/.gemini/skills/`
 - `~/.agent/skills/`
 - `~/.cursor/skills/`
 - `~/.codex/skills/`
 
+## Behavior
+
+- **Scan rule**: Only directories containing `SKILL.md` are treated as skills.
+- **Enablement**: Enabled by default; disabled only when `enabled = false` exists.
+- **Config edits**: Minimal-edit strategy for the target block only.
+- **Restart required**: Enable/disable requires app restart to apply.
+- **Delete**: Moves to Trash and cleans any matching config entry.
+
+## Configuration
+
+| Item | Description | Default |
+|------|-------------|---------|
+| Skills Root Path | Folder containing skill subfolders | Set in Settings |
+| Config Path | Where enable/disable is stored | `~/.codex/config.toml` |
+
 ## Troubleshooting
 
-- **“No skills found”**: Ensure your folder contains subfolders with `SKILL.md`.
-- **Read error**: The selected folder may be missing or inaccessible.
-- **Changes not applied**: Restart the app after enable/disable changes.
+- **No skills found**: Ensure subfolders contain `SKILL.md`.
+- **Read error**: The path may be missing or inaccessible.
+- **Changes not applied**: Restart the app after toggles.
 
 ## Build
 
@@ -43,7 +60,6 @@ Auto detect checks common locations:
 npm run tauri build
 ```
 
-## Notes
+## License
 
-- Config file path: `~/.codex/config.toml`
-- Skills root path is user-configurable in Settings
+MIT
