@@ -1,4 +1,5 @@
 import { invoke, isTauri } from '@tauri-apps/api/core'
+import { open } from '@tauri-apps/plugin-dialog'
 
 export type Skill = {
   id: string
@@ -26,7 +27,24 @@ type AppState = {
   rootPath: string
 }
 
+type RootPathStats = {
+  count: number
+  lastModified: number | null
+}
+
+type RootCandidate = RootPathStats & {
+  path: string
+  labelKey: string
+}
+
 const REFRESH_INTERVAL_MS = 5000
+const COMMON_ROOTS: RootCandidate[] = [
+  { labelKey: 'rootPathClaude', path: '~/.claude/skills/', count: 0, lastModified: null },
+  { labelKey: 'rootPathGemini', path: '~/.gemini/skills/', count: 0, lastModified: null },
+  { labelKey: 'rootPathAntigravity', path: '~/.agent/skills/', count: 0, lastModified: null },
+  { labelKey: 'rootPathCursor', path: '~/.cursor/skills/', count: 0, lastModified: null },
+  { labelKey: 'rootPathCodex', path: '~/.codex/skills/', count: 0, lastModified: null }
+]
 
 export function mountApp(root: HTMLElement) {
   root.innerHTML = `
@@ -128,7 +146,7 @@ export function mountApp(root: HTMLElement) {
             </button>
           </div>
           <div class="settings-body">
-            <div class="settings-card">
+            <div class="settings-card settings-card--split">
               <div>
                 <label class="settings-label" id="languageLabel"></label>
                 <div class="settings-hint" id="languageHint"></div>
@@ -138,12 +156,33 @@ export function mountApp(root: HTMLElement) {
                 <button class="segment" data-lang="zh">中文</button>
               </div>
             </div>
-            <div class="settings-card">
-              <div>
-                <label class="settings-label" id="rootPathLabel"></label>
-                <div class="settings-hint" id="rootPathHint"></div>
+            <div class="settings-card settings-card--stack">
+              <div class="settings-card-head">
+                <div>
+                  <label class="settings-label" id="rootPathLabel"></label>
+                  <div class="settings-hint" id="rootPathHint"></div>
+                </div>
               </div>
-              <input id="rootPathInput" type="text" />
+              <div class="settings-root">
+                <div class="settings-input-row">
+                  <input id="rootPathInput" type="text" readonly />
+                  <button class="ghost settings-browse" id="rootPathBrowse"></button>
+                </div>
+                <div class="settings-meta" id="rootPathMeta" hidden></div>
+                <div class="settings-actions">
+                  <button class="ghost settings-detect" id="rootPathDetect"></button>
+                </div>
+                <div class="settings-quick" id="rootPathQuick"></div>
+                <div class="settings-candidates" id="rootPathCandidates" hidden>
+                  <div class="settings-candidates-title" id="rootPathCandidatesTitle"></div>
+                  <div class="settings-candidates-list" id="rootPathCandidatesList"></div>
+                </div>
+                <div class="settings-empty" id="rootPathEmpty" hidden>
+                  <div class="settings-empty-title" id="rootPathEmptyTitle"></div>
+                  <div class="settings-empty-hint" id="rootPathEmptyHint"></div>
+                  <div class="settings-empty-actions" id="rootPathEmptyActions"></div>
+                </div>
+              </div>
             </div>
             <div class="settings-error" id="rootPathError" hidden></div>
           </div>
@@ -167,6 +206,9 @@ export function mountApp(root: HTMLElement) {
     language: (localStorage.getItem('csm_language') as AppState['language']) || 'en',
     rootPath: localStorage.getItem('csm_root_path') || ''
   }
+
+  let rootPathStats: RootPathStats | null = null
+  let rootPathCandidates: RootCandidate[] = []
 
   const searchInput = root.querySelector<HTMLInputElement>('#searchInput')!
   const settingsBtn = root.querySelector<HTMLButtonElement>('#settingsBtn')!
@@ -206,6 +248,17 @@ export function mountApp(root: HTMLElement) {
   const rootPathLabel = root.querySelector<HTMLLabelElement>('#rootPathLabel')!
   const rootPathHint = root.querySelector<HTMLDivElement>('#rootPathHint')!
   const rootPathInput = root.querySelector<HTMLInputElement>('#rootPathInput')!
+  const rootPathBrowse = root.querySelector<HTMLButtonElement>('#rootPathBrowse')!
+  const rootPathMeta = root.querySelector<HTMLDivElement>('#rootPathMeta')!
+  const rootPathDetect = root.querySelector<HTMLButtonElement>('#rootPathDetect')!
+  const rootPathQuick = root.querySelector<HTMLDivElement>('#rootPathQuick')!
+  const rootPathCandidates = root.querySelector<HTMLDivElement>('#rootPathCandidates')!
+  const rootPathCandidatesTitle = root.querySelector<HTMLDivElement>('#rootPathCandidatesTitle')!
+  const rootPathCandidatesList = root.querySelector<HTMLDivElement>('#rootPathCandidatesList')!
+  const rootPathEmpty = root.querySelector<HTMLDivElement>('#rootPathEmpty')!
+  const rootPathEmptyTitle = root.querySelector<HTMLDivElement>('#rootPathEmptyTitle')!
+  const rootPathEmptyHint = root.querySelector<HTMLDivElement>('#rootPathEmptyHint')!
+  const rootPathEmptyActions = root.querySelector<HTMLDivElement>('#rootPathEmptyActions')!
   const rootPathError = root.querySelector<HTMLDivElement>('#rootPathError')!
   const brandTitle = root.querySelector<HTMLDivElement>('#brandTitle')!
   const brandSubtitle = root.querySelector<HTMLDivElement>('#brandSubtitle')!
@@ -268,8 +321,16 @@ export function mountApp(root: HTMLElement) {
     void closeSettings()
   })
 
-  rootPathInput.addEventListener('input', () => {
-    rootPathError.hidden = true
+  rootPathInput.addEventListener('click', () => {
+    void browseForRootPath()
+  })
+
+  rootPathBrowse.addEventListener('click', () => {
+    void browseForRootPath()
+  })
+
+  rootPathDetect.addEventListener('click', () => {
+    void autoDetectFirst()
   })
 
   languageSegmented.querySelectorAll<HTMLButtonElement>('.segment').forEach((btn) => {
@@ -280,6 +341,152 @@ export function mountApp(root: HTMLElement) {
       render()
     })
   })
+
+  function formatStatsLine(stats: RootPathStats | null, path: string) {
+    if (!stats) return ''
+    const updated = stats.lastModified ? formatDate(stats.lastModified) : '—'
+    return t('rootPathDetected', { count: stats.count, path, updated })
+  }
+
+  function updateRootPathMeta(path: string, stats: RootPathStats | null) {
+    if (!path || !stats) {
+      rootPathMeta.hidden = true
+      rootPathMeta.textContent = ''
+      return
+    }
+    rootPathMeta.textContent = formatStatsLine(stats, path)
+    rootPathMeta.hidden = false
+  }
+
+  async function getStatsForPath(path: string): Promise<RootPathStats | null> {
+    if (!isTauriEnv) return null
+    try {
+      const items = await invoke<Skill[]>('list_skills', { rootPath: path })
+      if (!items.length) return null
+      const lastModified = items.reduce((max, skill) => Math.max(max, skill.skill_mtime || 0), 0)
+      return { count: items.length, lastModified: lastModified || null }
+    } catch {
+      return null
+    }
+  }
+
+  function renderQuickButtons(container: HTMLElement, includeAll = true) {
+    container.innerHTML = ''
+    const roots = includeAll ? COMMON_ROOTS : COMMON_ROOTS.filter((item) =>
+      ['rootPathClaude', 'rootPathCursor', 'rootPathCodex'].includes(item.labelKey)
+    )
+    roots.forEach((item) => {
+      const btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'ghost settings-quick-btn'
+      btn.textContent = t(item.labelKey)
+      btn.dataset.path = item.path
+      btn.addEventListener('click', () => void applyRootPath(item.path, 'quick'))
+      container.appendChild(btn)
+    })
+  }
+
+  function renderCandidates() {
+    rootPathCandidatesList.innerHTML = ''
+    if (!rootPathCandidates.length) {
+      rootPathCandidates.hidden = true
+      return
+    }
+    rootPathCandidates.hidden = false
+    rootPathCandidatesTitle.textContent = t('rootPathCandidatesTitle')
+    rootPathCandidates.forEach((candidate) => {
+      const btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'settings-candidate'
+      btn.dataset.path = candidate.path
+      btn.innerHTML = `
+        <div class="settings-candidate-body">
+          <div class="settings-candidate-path">${candidate.path}</div>
+          <div class="settings-candidate-meta">${t('rootPathCandidateMeta', {
+            count: candidate.count,
+            updated: candidate.lastModified ? formatDate(candidate.lastModified) : '—'
+          })}</div>
+        </div>
+        <span class="settings-candidate-action">${t('select')}</span>
+      `
+      btn.addEventListener('click', () => void applyRootPath(candidate.path, 'candidate'))
+      rootPathCandidatesList.appendChild(btn)
+    })
+  }
+
+  function setEmptyState(show: boolean) {
+    rootPathEmpty.hidden = !show
+    if (show) {
+      rootPathEmptyTitle.textContent = t('rootPathEmptyTitle')
+      rootPathEmptyHint.textContent = t('rootPathEmptyHint')
+      renderQuickButtons(rootPathEmptyActions, false)
+    }
+  }
+
+  async function detectRootCandidates() {
+    rootPathCandidates = []
+    rootPathCandidatesTitle.textContent = ''
+    rootPathCandidatesList.innerHTML = ''
+    rootPathCandidates.hidden = true
+    setEmptyState(false)
+    for (const root of COMMON_ROOTS) {
+      const stats = await getStatsForPath(root.path)
+      if (stats && stats.count > 0) {
+        rootPathCandidates.push({ ...root, ...stats })
+      }
+    }
+    renderCandidates()
+    if (!rootPathCandidates.length) {
+      setEmptyState(true)
+    }
+  }
+
+  async function applyRootPath(path: string, source: 'browse' | 'quick' | 'candidate' | 'detect') {
+    rootPathInput.value = path
+    rootPathError.hidden = true
+    rootPathMeta.textContent = t('rootPathChecking')
+    rootPathMeta.hidden = false
+    setEmptyState(false)
+    const stats = await getStatsForPath(path)
+    if (!stats) {
+      rootPathStats = null
+      rootPathMeta.hidden = true
+      rootPathError.textContent = t('rootPathNoSkills')
+      rootPathError.hidden = false
+      updateSettingsLock()
+      return
+    }
+    rootPathStats = stats
+    updateRootPathMeta(path, stats)
+    updateSettingsLock()
+    if (source === 'detect') {
+      showToast(t('rootPathDetectedToast', { count: stats.count, path }))
+    }
+  }
+
+  async function browseForRootPath() {
+    try {
+      const result = await open({ directory: true, multiple: false })
+      if (!result) return
+      const path = Array.isArray(result) ? result[0] : result
+      if (!path) return
+      await applyRootPath(path, 'browse')
+    } catch (err) {
+      setError(`${t('rootPathBrowseFailed')}: ${formatError(err)}`)
+    }
+  }
+
+  async function autoDetectFirst() {
+    rootPathError.hidden = true
+    await detectRootCandidates()
+    if (rootPathCandidates.length) {
+      await applyRootPath(rootPathCandidates[0].path, 'detect')
+      return
+    }
+    rootPathError.textContent = t('rootPathDetectNone')
+    rootPathError.hidden = false
+    setEmptyState(true)
+  }
 
   window.addEventListener('keydown', (event) => {
     const target = event.target as HTMLElement | null
@@ -311,6 +518,9 @@ export function mountApp(root: HTMLElement) {
       if (showStatus) setStatus('Refreshing…')
       const items = await invoke<Skill[]>('list_skills', { rootPath: state.rootPath })
       state.skills = items
+      const lastModified = items.reduce((max, skill) => Math.max(max, skill.skill_mtime || 0), 0)
+      rootPathStats = items.length ? { count: items.length, lastModified: lastModified || null } : null
+      updateRootPathMeta(state.rootPath, rootPathStats)
       if (state.selectedRealpath) {
         const match = items.find((s) => s.realpath === state.selectedRealpath)
         state.selectedId = match ? match.id : null
@@ -825,6 +1035,9 @@ export function mountApp(root: HTMLElement) {
     languageHint.textContent = t('languageHint')
     rootPathLabel.textContent = t('rootPath')
     rootPathHint.textContent = t('rootPathHint')
+    rootPathBrowse.textContent = t('rootPathBrowse')
+    rootPathDetect.textContent = t('rootPathDetect')
+    rootPathCandidatesTitle.textContent = t('rootPathCandidatesTitle')
     settingsClose.setAttribute('aria-label', t('close'))
     settingsFooterClose.textContent = t('done')
     languageSegmented.querySelectorAll<HTMLButtonElement>('.segment').forEach((btn) => {
@@ -832,6 +1045,12 @@ export function mountApp(root: HTMLElement) {
     })
     rootPathInput.placeholder = t('rootPathPlaceholder')
     rootPathInput.value = state.rootPath
+    renderQuickButtons(rootPathQuick)
+    renderCandidates()
+    if (!rootPathEmpty.hidden) {
+      setEmptyState(true)
+    }
+    updateRootPathMeta(state.rootPath, rootPathStats)
     updateSettingsLock()
     if (!statusText.textContent) {
       setStatus(t('ready'))
@@ -839,7 +1058,7 @@ export function mountApp(root: HTMLElement) {
   }
 
   function updateSettingsLock() {
-    const locked = !state.rootPath
+    const locked = !rootPathInput.value.trim()
     settingsClose.disabled = locked
     settingsFooterClose.disabled = locked
     settingsBackdrop.dataset.locked = locked ? 'true' : 'false'
@@ -849,6 +1068,11 @@ export function mountApp(root: HTMLElement) {
     settingsBackdrop.hidden = false
     rootPathInput.value = state.rootPath
     rootPathError.hidden = true
+    renderQuickButtons(rootPathQuick)
+    updateRootPathMeta(state.rootPath, rootPathStats)
+    if (!state.rootPath) {
+      void detectRootCandidates()
+    }
     if (force) {
       settingsBackdrop.dataset.locked = 'true'
       settingsClose.disabled = true
@@ -865,6 +1089,16 @@ export function mountApp(root: HTMLElement) {
       rootPathError.hidden = false
       return
     }
+    let stats = rootPathStats
+    if (!stats || candidate !== state.rootPath) {
+      stats = await getStatsForPath(candidate)
+    }
+    if (!stats) {
+      rootPathError.textContent = t('rootPathNoSkills')
+      rootPathError.hidden = false
+      return
+    }
+    rootPathStats = stats
     state.rootPath = candidate
     localStorage.setItem('csm_root_path', state.rootPath)
     rootPathError.hidden = true
@@ -915,9 +1149,22 @@ export function mountApp(root: HTMLElement) {
       rootPath: 'Skills root path',
       rootPathHint: 'Set the folder that contains your SKILL.md directories.',
       rootPathPlaceholder: '/path/to/skills',
+      rootPathBrowse: 'Browse',
+      rootPathDetect: 'Auto Detect',
+      rootPathChecking: 'Checking…',
+      rootPathDetected: 'Selected {path} · {count} skills · Last updated {updated}',
+      rootPathDetectedToast: 'Detected {count} skills at {path}',
+      rootPathNoSkills: 'No skills found in that folder.',
+      rootPathDetectNone: 'No known skills folders detected.',
+      rootPathCandidatesTitle: 'Detected paths',
+      rootPathCandidateMeta: '{count} skills · Updated {updated}',
+      rootPathEmptyTitle: 'Choose a folder',
+      rootPathEmptyHint: 'Pick a known location or auto-detect.',
       rootPathRequired: 'Please set a valid skills root path.',
+      rootPathBrowseFailed: 'Browse failed',
       rootRequired: 'Skills root path is required. Open Settings to configure.',
       done: 'Done',
+      select: 'Select',
       deleteConfirmTitle: 'Delete {name}?',
       deleteConfirmBody: 'This will move the folder to Trash.',
       enabling: 'Enabling…',
@@ -932,6 +1179,11 @@ export function mountApp(root: HTMLElement) {
       open: 'Open',
       opening: 'Opening…',
       openFailed: 'Open failed',
+      rootPathClaude: 'Claude Code',
+      rootPathGemini: 'Gemini CLI',
+      rootPathAntigravity: 'Antigravity IDE',
+      rootPathCursor: 'Cursor',
+      rootPathCodex: 'Codex',
       tagLabels: {
         security: 'Security',
         frontend: 'Frontend',
@@ -986,9 +1238,22 @@ export function mountApp(root: HTMLElement) {
       rootPath: '技能根目录',
       rootPathHint: '设置包含 SKILL.md 的目录。',
       rootPathPlaceholder: '/path/to/skills',
+      rootPathBrowse: '浏览',
+      rootPathDetect: '自动检测',
+      rootPathChecking: '正在检测…',
+      rootPathDetected: '已选择 {path} · {count} 个 skills · 最近更新 {updated}',
+      rootPathDetectedToast: '已检测到 {count} 个 skills：{path}',
+      rootPathNoSkills: '该文件夹未发现 skills。',
+      rootPathDetectNone: '未检测到常见 skills 路径。',
+      rootPathCandidatesTitle: '检测到的路径',
+      rootPathCandidateMeta: '{count} 个 skills · 更新 {updated}',
+      rootPathEmptyTitle: '选择文件夹',
+      rootPathEmptyHint: '选择常见路径或自动检测。',
       rootPathRequired: '请设置有效的技能根目录。',
+      rootPathBrowseFailed: '浏览失败',
       rootRequired: '需要先设置技能根目录，请在设置中配置。',
       done: '完成',
+      select: '选择',
       deleteConfirmTitle: '删除 {name}？',
       deleteConfirmBody: '将把文件夹移到废纸篓。',
       enabling: '正在启用…',
@@ -1003,6 +1268,11 @@ export function mountApp(root: HTMLElement) {
       open: '打开',
       opening: '正在打开…',
       openFailed: '打开失败',
+      rootPathClaude: 'Claude Code',
+      rootPathGemini: 'Gemini CLI',
+      rootPathAntigravity: 'Antigravity IDE',
+      rootPathCursor: 'Cursor',
+      rootPathCodex: 'Codex',
       tagLabels: {
         security: '安全',
         frontend: '前端',
