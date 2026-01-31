@@ -32,6 +32,11 @@ type RootPathStats = {
   lastModified: number | null
 }
 
+type RootPathCheck = {
+  stats: RootPathStats | null
+  error?: string
+}
+
 type RootCandidate = RootPathStats & {
   path: string
   labelKey: string
@@ -356,15 +361,15 @@ export function mountApp(root: HTMLElement) {
     rootPathMeta.hidden = false
   }
 
-  async function getStatsForPath(path: string): Promise<RootPathStats | null> {
-    if (!isTauriEnv) return null
+  async function getStatsForPath(path: string): Promise<RootPathCheck> {
+    if (!isTauriEnv) return { stats: null, error: 'Tauri only' }
     try {
       const items = await invoke<Skill[]>('list_skills', { rootPath: path })
-      if (!items.length) return null
+      if (!items.length) return { stats: null, error: t('rootPathNoSkills') }
       const lastModified = items.reduce((max, skill) => Math.max(max, skill.skill_mtime || 0), 0)
-      return { count: items.length, lastModified: lastModified || null }
+      return { stats: { count: items.length, lastModified: lastModified || null } }
     } catch {
-      return null
+      return { stats: null, error: t('rootPathReadFailed') }
     }
   }
 
@@ -430,9 +435,9 @@ export function mountApp(root: HTMLElement) {
     rootPathCandidatesEl.hidden = true
     setEmptyState(false)
     for (const root of COMMON_ROOTS) {
-      const stats = await getStatsForPath(root.path)
-      if (stats && stats.count > 0) {
-        rootPathCandidates.push({ ...root, ...stats })
+      const check = await getStatsForPath(root.path)
+      if (check.stats && check.stats.count > 0) {
+        rootPathCandidates.push({ ...root, ...check.stats })
       }
     }
     renderCandidates()
@@ -447,20 +452,20 @@ export function mountApp(root: HTMLElement) {
     rootPathMeta.textContent = t('rootPathChecking')
     rootPathMeta.hidden = false
     setEmptyState(false)
-    const stats = await getStatsForPath(path)
-    if (!stats) {
+    const check = await getStatsForPath(path)
+    if (!check.stats) {
       rootPathStats = null
       rootPathMeta.hidden = true
-      rootPathError.textContent = t('rootPathNoSkills')
+      rootPathError.textContent = check.error || t('rootPathNoSkills')
       rootPathError.hidden = false
       updateSettingsLock()
       return
     }
-    rootPathStats = stats
-    updateRootPathMeta(stats)
+    rootPathStats = check.stats
+    updateRootPathMeta(check.stats)
     updateSettingsLock()
     if (source === 'detect') {
-      showToast(t('rootPathDetectedToast', { count: stats.count, path }))
+      showToast(t('rootPathDetectedToast', { count: check.stats.count, path }))
     }
   }
 
@@ -1089,7 +1094,13 @@ export function mountApp(root: HTMLElement) {
     }
     let stats = rootPathStats
     if (!stats || candidate !== state.rootPath) {
-      stats = await getStatsForPath(candidate)
+      const check = await getStatsForPath(candidate)
+      stats = check.stats
+      if (!stats) {
+        rootPathError.textContent = check.error || t('rootPathNoSkills')
+        rootPathError.hidden = false
+        return
+      }
     }
     if (!stats) {
       rootPathError.textContent = t('rootPathNoSkills')
@@ -1153,6 +1164,7 @@ export function mountApp(root: HTMLElement) {
       rootPathDetected: '{count} skills · Last updated {updated}',
       rootPathDetectedToast: 'Detected {count} skills at {path}',
       rootPathNoSkills: 'No skills found in that folder.',
+      rootPathReadFailed: 'Unable to read this folder.',
       rootPathDetectNone: 'No known skills folders detected.',
       rootPathCandidatesTitle: 'Detected paths',
       rootPathCandidateMeta: '{count} skills · Updated {updated}',
@@ -1239,12 +1251,13 @@ export function mountApp(root: HTMLElement) {
       rootPathBrowse: '浏览',
       rootPathDetect: '自动检测',
       rootPathChecking: '正在检测…',
-      rootPathDetected: '{count} 个 skills · 最近更新 {updated}',
-      rootPathDetectedToast: '已检测到 {count} 个 skills：{path}',
-      rootPathNoSkills: '该文件夹未发现 skills。',
-      rootPathDetectNone: '未检测到常见 skills 路径。',
+      rootPathDetected: '{count} 个技能 · 最近更新 {updated}',
+      rootPathDetectedToast: '已检测到 {count} 个技能：{path}',
+      rootPathNoSkills: '该文件夹未发现技能。',
+      rootPathReadFailed: '无法读取该文件夹。',
+      rootPathDetectNone: '未检测到常见技能路径。',
       rootPathCandidatesTitle: '检测到的路径',
-      rootPathCandidateMeta: '{count} 个 skills · 更新 {updated}',
+      rootPathCandidateMeta: '{count} 个技能 · 更新 {updated}',
       rootPathEmptyTitle: '选择文件夹',
       rootPathEmptyHint: '选择常见路径或自动检测。',
       rootPathRequired: '请设置有效的技能根目录。',
