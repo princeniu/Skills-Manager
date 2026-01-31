@@ -37,6 +37,11 @@ type RootPathCheck = {
   error?: string
 }
 
+type Translation = {
+  [key: string]: string | Record<string, string>
+  tagLabels: Record<string, string>
+}
+
 type RootCandidate = RootPathStats & {
   path: string
   labelKey: string
@@ -216,6 +221,7 @@ export function mountApp(root: HTMLElement) {
 
   const searchInput = root.querySelector<HTMLInputElement>('#searchInput')!
   const settingsBtn = root.querySelector<HTMLButtonElement>('#settingsBtn')!
+  const settingsBtnLabel = root.querySelector<HTMLSpanElement>('#settingsBtnLabel')!
   const skillList = root.querySelector<HTMLDivElement>('#skillList')!
   const listMeta = root.querySelector<HTMLDivElement>('#listMeta')!
   const countAll = root.querySelector<HTMLSpanElement>('#countAll')!
@@ -1011,7 +1017,8 @@ export function mountApp(root: HTMLElement) {
 
   function t(key: string, vars: Record<string, string | number> = {}) {
     const dict = translations[state.language] || translations.en
-    const template = dict[key] || key
+    const raw = dict[key]
+    const template = typeof raw === 'string' ? raw : key
     return Object.entries(vars).reduce((acc, [k, v]) => acc.replace(`{${k}}`, String(v)), template)
   }
 
@@ -1116,7 +1123,7 @@ export function mountApp(root: HTMLElement) {
     await refreshSkills(true)
   }
 
-  const translations: Record<string, Record<string, string>> = {
+  const translations: Record<string, Translation> = {
     en: {
       appTitle: 'Skills Manager',
       appSubtitle: 'Local skill registry • Tauri desktop',
