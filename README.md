@@ -82,6 +82,14 @@ Auto-detect checks common locations:
 npm run tauri build
 ```
 
+## Roadmap
+
+- **Multi-root support**: manage multiple skills folders in one app.
+- **Tag system**: user-defined tags, filters, and tag management.
+- **Export & backup**: export skills metadata and backup/restore configs.
+- **Batch operations**: enable/disable/delete in bulk with safety prompts.
+- **Workspace profiles**: switch between different toolchains quickly.
+
 ## License
 
 MIT
