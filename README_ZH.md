@@ -1,8 +1,30 @@
-# Skills Manager
+<p align="center">
+  <img src="./public/brand/icon.png" alt="Skills Manager" width="96" height="96" />
+</p>
 
-本地 macOS 应用：用于扫描、查看并安全管理不同工具链的技能库（Skill Registry）。
+<h1 align="center">Skills Manager</h1>
 
-[English README](./README.md)
+<p align="center">
+  <a href="https://img.shields.io/badge/platform-macOS-2A3037?style=flat&labelColor=1B1F24">
+    <img alt="platform" src="https://img.shields.io/badge/platform-macOS-2A3037?style=flat&labelColor=1B1F24" />
+  </a>
+  <a href="https://img.shields.io/badge/tauri-v2-5B7CFA?style=flat&labelColor=1B1F24">
+    <img alt="tauri" src="https://img.shields.io/badge/tauri-v2-5B7CFA?style=flat&labelColor=1B1F24" />
+  </a>
+  <a href="./LICENSE">
+    <img alt="license" src="https://img.shields.io/badge/license-MIT-5CCF8D?style=flat&labelColor=1B1F24" />
+  </a>
+</p>
+
+<p align="center">
+  本地 macOS 应用：用于扫描、查看并安全管理不同工具链的技能库（Skill Registry）。
+</p>
+
+<p align="center">
+  <a href="./README.md">English README</a>
+</p>
+
+---
 
 ## 核心亮点
 

@@ -1,8 +1,30 @@
-# Skills Manager
+<p align="center">
+  <img src="./public/brand/icon.png" alt="Skills Manager" width="96" height="96" />
+</p>
 
-A local macOS app to scan, inspect, and manage agent skill registries across toolchains.
+<h1 align="center">Skills Manager</h1>
 
-[中文 README](./README_ZH.md)
+<p align="center">
+  <a href="https://img.shields.io/badge/platform-macOS-2A3037?style=flat&labelColor=1B1F24">
+    <img alt="platform" src="https://img.shields.io/badge/platform-macOS-2A3037?style=flat&labelColor=1B1F24" />
+  </a>
+  <a href="https://img.shields.io/badge/tauri-v2-5B7CFA?style=flat&labelColor=1B1F24">
+    <img alt="tauri" src="https://img.shields.io/badge/tauri-v2-5B7CFA?style=flat&labelColor=1B1F24" />
+  </a>
+  <a href="./LICENSE">
+    <img alt="license" src="https://img.shields.io/badge/license-MIT-5CCF8D?style=flat&labelColor=1B1F24" />
+  </a>
+</p>
+
+<p align="center">
+  A local macOS app to scan, inspect, and manage agent skill registries across toolchains.
+</p>
+
+<p align="center">
+  <a href="./README_ZH.md">中文 README</a>
+</p>
+
+---
 
 ## Highlights
 
