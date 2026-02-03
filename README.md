@@ -34,6 +34,13 @@
 - **Safe delete**: Moves skill folders to system Trash and cleans config entries.
 - **Common paths**: Auto-detects well-known skill locations.
 
+
+## Demo Video (9:16)
+
+<p align="center">
+  <video src="./public/media/promo-9x16.mp4" controls muted playsinline width="320"></video>
+</p>
+
 ## Quick Start
 
 ```bash

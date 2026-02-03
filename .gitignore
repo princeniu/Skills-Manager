@@ -23,3 +23,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Remotion video outputs
+video/out/
+video/node_modules/

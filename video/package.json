@@ -1,0 +1,21 @@
+{
+  "name": "video",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npx remotion preview src/entry.tsx",
+    "render:16x9": "npx remotion render src/entry.tsx Promo16x9 out/Skills-Manager-16x9.mp4",
+    "render:9x16": "npx remotion render src/entry.tsx Promo9x16 out/Skills-Manager-9x16.mp4",
+    "render:all": "npm run render:16x9 && npm run render:9x16"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@remotion/cli": "^4.0.417",
+    "remotion": "^4.0.417"
+  },
+  "type": "module"
+}
