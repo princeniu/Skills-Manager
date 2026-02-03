@@ -38,7 +38,7 @@
 ## Demo Video (9:16)
 
 <p align="center">
-  <video src="./public/media/promo-9x16.mp4" controls muted playsinline width="320"></video>
+  <img src="./public/media/promo-9x16.gif" alt="Skills Manager Demo" width="320" />
 </p>
 
 ## Quick Start
