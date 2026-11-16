@@ -27,3 +27,24 @@ dist-ssr
 # Remotion video outputs
 video/out/
 video/node_modules/
+
+# Private local state and generated artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p8
+*.p12
+*.pfx
+*.mobileprovision
+*.provisionprofile
+*.sqlite*
+*.db
+*.db-*
+.venv/
+venv/
+node_modules/
